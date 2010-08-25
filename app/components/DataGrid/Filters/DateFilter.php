@@ -1,9 +1,4 @@
 <?php
-
-require_once dirname(__FILE__) . '/TextFilter.php';
-
-
-
 /**
  * Representation of data grid column date filter.
  *
@@ -13,7 +8,8 @@ require_once dirname(__FILE__) . '/TextFilter.php';
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-class DateFilter extends TextFilter
+class DateFilter
+extends TextFilter
 {
 	/**
 	 * Returns filter's form element.

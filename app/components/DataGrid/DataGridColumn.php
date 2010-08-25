@@ -1,9 +1,4 @@
 <?php
-
-require_once dirname(__FILE__) . '/IDataGridColumn.php';
-
-
-
 /**
  * Base class that implements the basic common functionality to data grid columns.
  *
@@ -13,49 +8,47 @@ require_once dirname(__FILE__) . '/IDataGridColumn.php';
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-abstract class DataGridColumn extends ComponentContainer implements IDataGridColumn
+
+use Nette\ComponentContainer,
+	Nette\Web\Html;
+
+abstract class DataGridColumn
+extends ComponentContainer
+implements IDataGridColumn
 {
 	/** @var Html  table header element template */
 	protected $header;
-
 	/** @var Html  table cell element template */
 	protected $cell;
-
 	/** @var string */
 	protected $caption;
-
 	/** @var int */
-	protected $maxLength = 100;
-
+	protected $maxLength=100;
 	/** @var array  of arrays('pattern' => 'replacement') */
 	public $replacement;
-
 	/** @var array  of callback functions */
-	public $formatCallback = array();
-
+	public $formatCallback=array();
 	/** @var bool */
-	public $orderable = TRUE;
-
+	public $orderable=TRUE;
 	/** @var string */
-	public static $ajaxClass = 'datagrid-ajax';
-
+	public static $ajaxClass='datagrid-ajax';
 
 	/**
 	 * Data grid column constructor.
 	 * @param  string  textual caption of column
 	 * @param  int     maximum number of dislayed characters
 	 */
-	public function __construct($caption = NULL, $maxLength = NULL)
+	public function __construct($caption=NULL, $maxLength=NULL)
 	{
 		parent::__construct();
-		$this->addComponent(new ComponentContainer, 'filters');
-		$this->header = Html::el();
-		$this->cell = Html::el();
-		$this->caption = $caption;
-		if ($maxLength !== NULL) $this->maxLength = $maxLength;
+		$this->addComponent(new ComponentContainer(), 'filters');
+		$this->header=Html::el();
+		$this->cell=Html::el();
+		$this->caption=$caption;
+		if ($maxLength!==NULL)
+			$this->maxLength=$maxLength;
 		$this->monitor('DataGrid');
 	}
-
 
 	/**
 	 * This method will be called when the component (or component's parent)
@@ -67,30 +60,23 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 	{
 		if ($component instanceof DataGrid) {
 			$this->setParent($component);
-
-			if ($this->caption === NULL) {
-				$this->caption = $this->getName();
+			if ($this->caption===NULL)
+				$this->caption=$this->getName();
 			}
-		}
 	}
-
 
 	/**
 	 * Returns DataGrid.
 	 * @param  bool   throw exception if form doesn't exist?
 	 * @return DataGrid
 	 */
-	public function getDataGrid($need = TRUE)
+	public function getDataGrid($need=TRUE)
 	{
 		return $this->lookup('DataGrid', $need);
 	}
 
-
-
 	/********************* Html objects getters *********************/
-
-
-
+	
 	/**
 	 * Returns headers's HTML element template.
 	 * @return Html
@@ -99,7 +85,6 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 	{
 		return $this->header;
 	}
-
 
 	/**
 	 * Returns table's cell HTML element template.
@@ -110,26 +95,20 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 		return $this->cell;
 	}
 
-
 	/**
 	 * Setter / property method.
 	 * @return string
 	 */
 	public function getCaption()
 	{
-		if ($this->caption instanceof Html && $this->caption->title) {
+		if ($this->caption instanceof Html && $this->caption->title)
 			return $this->caption->title($this->getDataGrid(TRUE)->translate($this->caption->title));
-		} else {
+		else
 			return $this->getDataGrid(TRUE)->translate($this->caption);
-		}
 	}
 
-
-
 	/********************* interface \IDataGridColumn *********************/
-
-
-
+	
 	/**
 	 * Is column orderable?
 	 * @return bool
@@ -139,17 +118,15 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 		return $this->orderable;
 	}
 
-
 	/**
 	 * Gets header link (order signal)
 	 * @param  string  direction of sorting (a|d|NULL)
 	 * @return string
 	 */
-	public function getOrderLink($dir = NULL)
+	public function getOrderLink($dir=NULL)
 	{
-		return $this->getDataGrid(TRUE)->link('order', array('by' => $this->getName(), 'dir' => $dir));
+		return $this->getDataGrid(TRUE)->link('order', array('by'=>$this->getName(), 'dir'=>$dir));
 	}
-
 
 	/**
 	 * Has column filter box?
@@ -160,17 +137,15 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 		return $this->getFilter(FALSE) instanceof IDataGridColumnFilter;
 	}
 
-
 	/**
 	 * Returns column's filter.
 	 * @param  bool   throw exception if component doesn't exist?
 	 * @return IDataGridColumnFilter|NULL
 	 */
-	public function getFilter($need = TRUE)
+	public function getFilter($need=TRUE)
 	{
 		return $this->getComponent('filters')->getComponent($this->getName(), $need);
 	}
-
 
 	/**
 	 * Formats cell's content. Descendant can override this method to customize formating.
@@ -178,11 +153,10 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 	 * @param  DibiRow|array
 	 * @return string
 	 */
-	public function formatContent($value, $data = NULL)
+	public function formatContent($value, $data=NULL)
 	{
-		return (string) $value;
+		return (string)$value;
 	}
-
 
 	/**
 	 * Filters data source. Descendant can override this method to customize filtering.
@@ -194,31 +168,23 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 		return;
 	}
 
-
-
 	/********************* Default sorting and filtering *********************/
-
-
-
+	
 	/**
 	 * Adds default sorting to data grid.
 	 * @param string
 	 * @return DataGridColumn  provides a fluent interface
 	 */
-	public function addDefaultSorting($order = 'ASC')
+	public function addDefaultSorting($order='ASC')
 	{
-		$orders = array('ASC', 'DESC', 'asc', 'desc', 'A', 'D', 'a', 'd');
-		if (!in_array($order, $orders)) {
-			throw new InvalidArgumentException("Order must be in '" . implode(', ', $orders) . "', '$order' given.");
-		}
-
+		$orders=array('ASC', 'DESC', 'asc', 'desc', 'A', 'D', 'a', 'd');
+		if (!in_array($order, $orders))
+			throw new \InvalidArgumentException("Order must be in '".implode(', ', $orders)."', '$order' given.");
 		parse_str($this->getDataGrid()->defaultOrder, $list);
-		$list[$this->getName()] = strtolower($order[0]);
-		$this->getDataGrid()->defaultOrder = http_build_query($list, '', '&');
-
+		$list[$this->getName()]=strtolower($order[0]);
+		$this->getDataGrid()->defaultOrder=http_build_query($list, '', '&');
 		return $this;
 	}
-
 
 	/**
 	 * Adds default filtering to data grid.
@@ -228,12 +194,10 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 	public function addDefaultFiltering($value)
 	{
 		parse_str($this->getDataGrid()->defaultFilters, $list);
-		$list[$this->getName()] = $value;
-		$this->getDataGrid()->defaultFilters = http_build_query($list, '', '&');
-
+		$list[$this->getName()]=$value;
+		$this->getDataGrid()->defaultFilters=http_build_query($list, '', '&');
 		return $this;
 	}
-
 
 	/**
 	 * Removes data grid's default sorting.
@@ -242,12 +206,11 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 	public function removeDefaultSorting()
 	{
 		parse_str($this->getDataGrid()->defaultOrder, $list);
-		if (isset($list[$this->getName()])) unset($list[$this->getName()]);
-		$this->getDataGrid()->defaultOrder = http_build_query($list, '', '&');
-
+		if (isset($list[$this->getName()]))
+			unset($list[$this->getName()]);
+		$this->getDataGrid()->defaultOrder=http_build_query($list, '', '&');
 		return $this;
 	}
-
 
 	/**
 	 * Removes data grid's default filtering.
@@ -256,19 +219,14 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 	public function removeDefaultFiltering()
 	{
 		parse_str($this->getDataGrid()->defaultFilters, $list);
-		if (isset($list[$this->getName()])) unset($list[$this->getName()]);
-		$this->getDataGrid()->defaultFilters = http_build_query($list, '', '&');
-
+		if (isset($list[$this->getName()]))
+			unset($list[$this->getName()]);
+		$this->getDataGrid()->defaultFilters=http_build_query($list, '', '&');
 		return $this;
 	}
 
-
-
-
 	/********************* filter factories *********************/
-
-
-
+	
 	/**
 	 * Alias for method addTextFilter().
 	 * @return IDataGridColumnFilter
@@ -278,7 +236,6 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 		return $this->addTextFilter();
 	}
 
-
 	/**
 	 * Adds single-line text filter input to data grid.
 	 * @return IDataGridColumnFilter
@@ -286,10 +243,9 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 	 */
 	public function addTextFilter()
 	{
-		$this->_addFilter(new TextFilter);
+		$this->_addFilter(new TextFilter());
 		return $this->getFilter();
 	}
-
 
 	/**
 	 * Adds single-line text date filter input to data grid.
@@ -299,10 +255,9 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 	 */
 	public function addDateFilter()
 	{
-		$this->_addFilter(new DateFilter);
+		$this->_addFilter(new DateFilter());
 		return $this->getFilter();
 	}
-
 
 	/**
 	 * Adds check box filter input to data grid.
@@ -311,10 +266,9 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 	 */
 	public function addCheckboxFilter()
 	{
-		$this->_addFilter(new CheckboxFilter);
+		$this->_addFilter(new CheckboxFilter());
 		return $this->getFilter();
 	}
-
 
 	/**
 	 * Adds select box filter input to data grid.
@@ -324,12 +278,11 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 	 * @return IDataGridColumnFilter
 	 * @throws InvalidArgumentException
 	 */
-	public function addSelectboxFilter($items = NULL, $firstEmpty = TRUE, $translateItems = TRUE)
+	public function addSelectboxFilter($items=NULL, $firstEmpty=TRUE, $translateItems=TRUE)
 	{
 		$this->_addFilter(new SelectboxFilter($items, $firstEmpty));
 		return $this->getFilter()->translateItems($translateItems);
 	}
-
 
 	/**
 	 * Internal filter adding routine.
@@ -338,9 +291,8 @@ abstract class DataGridColumn extends ComponentContainer implements IDataGridCol
 	 */
 	private function _addFilter(IDataGridColumnFilter $filter)
 	{
-		if ($this->hasFilter()) {
+		if ($this->hasFilter())
 			$this->getComponent('filters')->removeComponent($this->getFilter());
-		}
 		$this->getComponent('filters')->addComponent($filter, $this->getName());
 	}
 }

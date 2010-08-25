@@ -1,9 +1,4 @@
 <?php
-
-require_once dirname(__FILE__) . '/NumericColumn.php';
-
-
-
 /**
  * Representation of checkbox data grid column.
  *
@@ -13,19 +8,22 @@ require_once dirname(__FILE__) . '/NumericColumn.php';
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-class CheckboxColumn extends NumericColumn
+
+use Nette\Web\Html;
+
+class CheckboxColumn
+extends NumericColumn
 {
 	/**
 	 * Checkbox column constructor.
 	 * @param  string  column's textual caption
 	 * @return void
 	 */
-	public function __construct($caption = NULL)
+	public function __construct($caption=NULL)
 	{
 		parent::__construct($caption, 0);
 		$this->getCellPrototype()->style('text-align: center');
 	}
-
 
 	/**
 	 * Formats cell's content.
@@ -33,13 +31,13 @@ class CheckboxColumn extends NumericColumn
 	 * @param  DibiRow|array
 	 * @return string
 	 */
-	public function formatContent($value, $data = NULL)
+	public function formatContent($value, $data=NULL)
 	{
-		$checkbox = Html::el('input')->type('checkbox')->disabled('disabled');
-		if ($value) $checkbox->checked = TRUE;
-		return (string) $checkbox;
+		$checkbox=Html::el('input')->type('checkbox')->disabled('disabled');
+		if ($value)
+			$checkbox->checked=TRUE;
+		return (string)$checkbox;
 	}
-
 
 	/**
 	 * Filters data source.
@@ -48,14 +46,16 @@ class CheckboxColumn extends NumericColumn
 	 */
 	public function applyFilter($value)
 	{
-		if (!$this->hasFilter()) return;
-
-		$datagrid = $this->getDataGrid(TRUE);
-		$column = $this->getName();
-		$value = (int)(bool)$value;
-		$cond = array();
-		if ($value) $cond[] = array("[$column] >= %b", TRUE);
-		else $cond[] = array("[$column] = %b", FALSE, " OR [$column] IS NULL");
+		if (!$this->hasFilter())
+			return;
+		$datagrid=$this->getDataGrid(TRUE);
+		$column=$this->getName();
+		$value=(int)(bool)$value;
+		$cond=array();
+		if ($value)
+			$cond[]=array("[$column] >= %b", TRUE);
+		else
+			$cond[]=array("[$column] = %b", FALSE, " OR [$column] IS NULL");
 		$datagrid->dataSource->where('%and', $cond);
 	}
 }

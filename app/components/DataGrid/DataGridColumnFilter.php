@@ -1,9 +1,4 @@
 <?php
-
-require_once dirname(__FILE__) . '/IDataGridColumnFilter.php';
-
-
-
 /**
  * Base class that implements the basic common functionality to data grid column's filters.
  *
@@ -13,26 +8,25 @@ require_once dirname(__FILE__) . '/IDataGridColumnFilter.php';
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-abstract class DataGridColumnFilter extends Component implements IDataGridColumnFilter
+
+use Nette\Component;
+
+abstract class DataGridColumnFilter
+extends Component
+implements IDataGridColumnFilter
 {
 	/** @var FormControl  form element */
 	protected $element;
-
 	/** @var string  value of filter (if was filtered) */
 	protected $value;
-
 
 	public function __construct()
 	{
 		parent::__construct();
 	}
 
-
-
 	/********************* interface \IDataGridColumnFilter *********************/
-
-
-
+	
 	/**
 	 * Returns filter's form element.
 	 * @return FormControl
@@ -41,26 +35,22 @@ abstract class DataGridColumnFilter extends Component implements IDataGridColumn
 	{
 	}
 
-
 	/**
 	 * Gets filter's value, if was filtered.
 	 * @return string
 	 */
 	public function getValue()
 	{
-		$dataGrid = $this->lookup('DataGrid', TRUE);
-
+		$dataGrid=$this->lookup('DataGrid', TRUE);
 		// set value if was data grid filtered yet
 		parse_str($dataGrid->filters, $list);
-		foreach ($list as $key => $value) {
-			if ($key == $this->getName()) {
+		foreach ($list as $key => $value)
+			if ($key==$this->getName()) {
 				$this->setValue($value);
 				break;
-			}
-		}
+				}
 		return $this->value;
 	}
-
 
 	/**
 	 * Sets filter's value.
@@ -70,6 +60,6 @@ abstract class DataGridColumnFilter extends Component implements IDataGridColumn
 	public function setValue($value)
 	{
 		$this->getFormControl()->setDefaultValue($value);
-		$this->value = $value;
+		$this->value=$value;
 	}
 }

@@ -1,9 +1,4 @@
 <?php
-
-require_once dirname(__FILE__) . '/../DataGridColumnFilter.php';
-
-
-
 /**
  * Representation of data grid column selectbox filter.
  *
@@ -13,20 +8,21 @@ require_once dirname(__FILE__) . '/../DataGridColumnFilter.php';
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-class SelectboxFilter extends DataGridColumnFilter
+
+use Nette\Forms\SelectBox,
+	Nette\Forms\FormControl;
+
+class SelectboxFilter
+extends DataGridColumnFilter
 {
 	/** @var array  asociative array of items in selectbox */
 	protected $generatedItems;
-
 	/** @var array  asociative array of items in selectbox */
 	protected $items;
-
 	/** @var bool */
 	protected $translateItems;
-
 	/** @var bool */
 	protected $firstEmpty;
-
 
 	/**
 	 * Selectbox filter constructor.
@@ -35,14 +31,13 @@ class SelectboxFilter extends DataGridColumnFilter
 	 * @param  bool    translate all items in selectbox?
 	 * @return void
 	 */
-	public function __construct(array $items = NULL, $firstEmpty = TRUE, $translateItems = TRUE)
+	public function __construct(array $items=NULL, $firstEmpty=TRUE, $translateItems=TRUE)
 	{
-		$this->items = $items;
-		$this->firstEmpty = $firstEmpty;
-		$this->translateItems = $translateItems;
+		$this->items=$items;
+		$this->firstEmpty=$firstEmpty;
+		$this->translateItems=$translateItems;
 		parent::__construct();
 	}
-
 
 	/**
 	 * Generates selectbox items.
@@ -51,34 +46,33 @@ class SelectboxFilter extends DataGridColumnFilter
 	public function generateItems()
 	{
 		// NOTE: don't generate if was items given in constructor
-		if (is_array($this->items)) return;
-
-		$dataGrid = $this->lookup('DataGrid', TRUE);
-
-		$columnName = $this->getName();
-		$dataSource = clone $dataGrid->dataSource;
+		if (is_array($this->items))
+			return;
+		
+		$dataGrid=$this->lookup('DataGrid', TRUE);
+		
+		$columnName=$this->getName();
+		$dataSource=clone $dataGrid->dataSource;
 		$dataSource->applyLimit(NULL);
-		$fluent = $dataSource->toFluent();
+		$fluent=$dataSource->toFluent();
 		$fluent->removeClause('select');
 		$fluent->select();
 		$fluent->distinct($columnName);
-
-		$cond = array();
-		$cond[] = array("[$columnName] NOT LIKE %s", '');
-
+		
+		$cond=array();
+		$cond[]=array("[$columnName] NOT LIKE %s", '');
+		
 		$fluent->where('%and', $cond)->orderBy($columnName);
-		$items = $fluent->fetchPairs($columnName, $columnName);
-
-		$this->generatedItems = $this->firstEmpty ? array("" => '?') + $items : $items;
-
+		$items=$fluent->fetchPairs($columnName, $columnName);
+		
+		$this->generatedItems=$this->firstEmpty? array(""=>'?')+$items : $items;
+		
 		// if was data grid already filtered by this filter don't update with filtred items (keep full list)
-		if (empty($this->element->value)) {
+		if (empty($this->element->value))
 			$this->element->setItems($this->generatedItems);
-		}
-
+		
 		return $this->items;
 	}
-
 
 	/**
 	 * Returns filter's form element.
@@ -86,27 +80,24 @@ class SelectboxFilter extends DataGridColumnFilter
 	 */
 	public function getFormControl()
 	{
-		if ($this->element instanceof FormControl) return $this->element;
-		$this->element = new SelectBox($this->getName(), $this->items);
-
+		if ($this->element instanceof FormControl)
+			return $this->element;
+		$this->element=new SelectBox($this->getName(), $this->items);
+		
 		// prepare items
-		if ($this->items === NULL) {
+		if ($this->items===NULL)
 			$this->generateItems();
-		}
-
+		
 		// skip first item?
-		if ($this->firstEmpty) {
+		if ($this->firstEmpty)
 			$this->element->skipFirst('?');
-		}
-
+		
 		// translate items?
-		if (!$this->translateItems) {
+		if (!$this->translateItems)
 			$this->element->setTranslator(NULL);
-		}
-
+		
 		return $this->element;
 	}
-
 
 	/**
 	 * Translate all items in selectbox?
@@ -115,7 +106,7 @@ class SelectboxFilter extends DataGridColumnFilter
 	 */
 	public function translateItems($translate)
 	{
-		$this->translateItems = (bool) $translate;
+		$this->translateItems=(bool)$translate;
 		return $this;
 	}
 }

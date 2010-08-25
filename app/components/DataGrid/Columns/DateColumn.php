@@ -1,9 +1,4 @@
 <?php
-
-require_once dirname(__FILE__) . '/TextColumn.php';
-
-
-
 /**
  * Representation of date data grid column.
  *
@@ -13,11 +8,11 @@ require_once dirname(__FILE__) . '/TextColumn.php';
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-class DateColumn extends TextColumn
+class DateColumn
+extends TextColumn
 {
 	/** @var string */
 	public $format;
-
 
 	/**
 	 * Date column constructor.
@@ -25,13 +20,12 @@ class DateColumn extends TextColumn
 	 * @param  string  date format supported by PHP strftime()
 	 * @return void
 	 */
-	public function __construct($caption = NULL, $format = '%x')
+	public function __construct($caption=NULL, $format='%x')
 	{
 		parent::__construct($caption);
-		$this->format = $format;
+		$this->format=$format;
 		$this->getHeaderPrototype()->style('width: 80px');
 	}
-
 
 	/**
 	 * Formats cell's content.
@@ -39,15 +33,14 @@ class DateColumn extends TextColumn
 	 * @param  DibiRow|array
 	 * @return string
 	 */
-	public function formatContent($value, $data = NULL)
+	public function formatContent($value, $data=NULL)
 	{
-		if ((int)$value == NULL || empty($value)) return 'N/A';
-		$value = parent::formatContent($value, $data);
-
-		$value = is_numeric($value) ? (int) $value : ($value instanceof DateTime ? $value->format('U') : strtotime($value));
+		if ((int)$value==NULL || empty($value))
+			return 'N/A';
+		$value=parent::formatContent($value, $data);
+		$value=is_numeric($value)? (int)$value : ($value instanceof DateTime? $value->format('U') : strtotime($value));
 		return strftime($this->format, $value);
 	}
-
 
 	/**
 	 * Applies filtering on dataset.
@@ -56,12 +49,12 @@ class DateColumn extends TextColumn
 	 */
 	public function applyFilter($value)
 	{
-		if (!$this->hasFilter()) return;
-
-		$datagrid = $this->getDataGrid(TRUE);
-		$column = $this->getName();
-		$cond = array();
-		$cond[] = array("[$column] = %t", $value);
+		if (!$this->hasFilter())
+			return;
+		$datagrid=$this->getDataGrid(TRUE);
+		$column=$this->getName();
+		$cond=array();
+		$cond[]=array("[$column] = %t", $value);
 		$datagrid->dataSource->where('%and', $cond);
 	}
 }

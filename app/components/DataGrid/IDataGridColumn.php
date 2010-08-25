@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Defines method that must be implemented to allow a component act like a data grid column.
  *
@@ -16,7 +15,6 @@ interface IDataGridColumn
 	 */
 	function isOrderable();
 
-
 	/**
 	 * Gets header link (order signal)
 	 * @param  string
@@ -24,20 +22,17 @@ interface IDataGridColumn
 	 */
 	function getOrderLink($dir = NULL);
 
-
 	/**
 	 * Has column filter box?
 	 * @return bool
 	 */
 	function hasFilter();
 
-
 	/**
 	 * Returns column's filter.
 	 * @return IDataGridColumnFilter|NULL
 	 */
 	function getFilter();
-
 
 	/**
 	 * Formats cell's content.
@@ -46,12 +41,10 @@ interface IDataGridColumn
 	 */
 	function formatContent($value);
 
-
 	/**
 	 * Filters data source.
 	 * @param  mixed
 	 * @return void
 	 */
 	function applyFilter($value);
-
 }

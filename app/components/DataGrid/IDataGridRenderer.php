@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Defines method that must implement data grid rendered.
  *
@@ -16,5 +15,4 @@ interface IDataGridRenderer
 	 * @return string
 	 */
 	function render(DataGrid $dataGrid);
-
 }

@@ -1,9 +1,4 @@
 <?php
-
-require_once dirname(__FILE__) . '/../DataGridColumnFilter.php';
-
-
-
 /**
  * Representation of data grid column checkbox filter.
  *
@@ -13,7 +8,12 @@ require_once dirname(__FILE__) . '/../DataGridColumnFilter.php';
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-class CheckboxFilter extends DataGridColumnFilter
+
+use Nette\Forms\Checkbox,
+	Nette\Forms\FormControl;
+
+class CheckboxFilter
+extends DataGridColumnFilter
 {
 	/**
 	 * Returns filter's form element.
@@ -21,9 +21,10 @@ class CheckboxFilter extends DataGridColumnFilter
 	 */
 	public function getFormControl()
 	{
-		if ($this->element instanceof FormControl) return $this->element;
-		$element = new Checkbox($this->getName());
-
-		return $this->element = $element;
+		if ($this->element instanceof FormControl)
+			return $this->element;
+		$element=new Checkbox($this->getName());
+		
+		return $this->element=$element;
 	}
 }
