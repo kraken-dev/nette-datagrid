@@ -121,7 +121,7 @@ class Conventional extends Nette\Object implements IRenderer
 	 */
 	public function __construct()
 	{
-		$this->file = __DIR__ . '/grid.phtml';
+		$this->file = __DIR__ . '/grid.latte';
 	}
 
 
