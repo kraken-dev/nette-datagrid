@@ -40,7 +40,8 @@ class DataSource extends DataSources\DataSource
 	 */
 	public function getColumns()
 	{
-		throw new \NotSupportedException;
+		$ds=clone $this->ds;
+		return array_keys((array)$ds->select('*')->applyLimit(1)->fetch());
 	}
 
 	/**
