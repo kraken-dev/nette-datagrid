@@ -19,26 +19,13 @@ use Nette;
  * A data bound list control that displays the items from data source in a table.
  * The DataGrid control allows you to select, sort, and manage these items.
  *
- * <code>
- * $grid = new DataGrid;
- * $grid->bindDataTable($model->findAll($model->table)->toDataSource());
- *
- * $grid->addColumn('column', 'Column caption')->addFilter();
- * $grid['column']->getCellPrototype()->style('text-align: center');
- *
- * $grid->addActionColumn('Actions');
- * $grid->addAction('Edit', 'Item:edit');
- *
- * $presenter->addComponent($grid, 'componentName');
- * </code>
- *
  * @author     Roman Sklenář
  * @copyright  Copyright (c) 2009 Roman Sklenář (http://romansklenar.cz)
  * @license    New BSD License
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-class DataGrid extends Nette\Application\Control implements \ArrayAccess, Nette\Forms\INamingContainer
+class DataGrid extends Nette\Application\Control implements \ArrayAccess
 {
 	/** @persistent int */
 	public $page = 1;
@@ -455,7 +442,7 @@ class DataGrid extends Nette\Application\Control implements \ArrayAccess, Nette\
 			$html = $this->__toString();
 
 			// Remove snippet-div to emulate native snippets... No extra support on client side is needed...
-			$snippet = 'snippet-' . $this->getName() . '-grid';
+			$snippet = 'snippet-' . $this->getUniqueId() . '-grid';
 			$start = strlen('<div id="' . $snippet . '">');
 			$stop = - strlen('</div>');
 			$html = trim(mb_substr($html, $start, $stop));
@@ -608,7 +595,7 @@ class DataGrid extends Nette\Application\Control implements \ArrayAccess, Nette\
 				}
 
 			} else {
-				throw new \InvalidStateException("Unknown submit button.");
+				throw new \InvalidStateException('Unknown submit button.');
 			}
 
 		}
@@ -673,7 +660,7 @@ class DataGrid extends Nette\Application\Control implements \ArrayAccess, Nette\
 		if ($this->wasRendered && $this->paginator->itemCount < 1 && !empty($this->filters)) {
 			// NOTE: don't use flash messages (because you can't - header already sent)
 			$this->getTemplate()->flashes[] = (object) array(
-				'message' => $this->translate("Used filters did not match any items."),
+				'message' => $this->translate('Used filters did not match any items.'),
 				'type' => 'info',
 			);
 		}

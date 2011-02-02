@@ -2,58 +2,48 @@
 
 namespace DataGrid\DataSources\Doctrine;
 
-use Doctrine, Doctrine\ORM\Query\Expr;
+use Doctrine,
+	Doctrine\ORM\Query\Expr,
+	DataGrid\DataSources,
+	DataGrid\DataSources\Utils\WildcardHelper;
 
 /**
  * Query Builder based data source
  * @author Michael Moravec
  * @author Štěpán Svoboda
  */
-class QueryBuilder extends Mapped
+class QueryBuilder extends DataSources\Mapped
 {
 	const MAP_PROPERTIES = 1;
 	const MAP_OBJECTS = 2;
 
 	/**
-	 * Query builder instance
-	 * 
-	 * @var Doctrine\ORM\QueryBuilder 
+	 * @var Doctrine\ORM\QueryBuilder Query builder instance
 	 */
 	private $qb;
 
-
 	/**
 	 * The mapping type
-	 *
 	 * This is automaticaly detected from the SELECT statement.
 	 * Supported are:
-	 * 
 	 *		1. Mapping properties via "SELECT a.id FROM Entities\Article a"
 	 *		2. Mapping objects via "SELECT a FROM Entities\Article a"
-	 * 
 	 * @var integer
 	 */
 	private $mappingType;
 
-	
 	/**
-	 * Fetched data
-	 * 
-	 * @var array
+	 * @var array Fetched data
 	 */
 	private $data;
 
 	/**
-	 * Total data count
-	 *
-	 * @var int
+	 * @var int Total data count
 	 */
 	private $count;
 
-
 	/**
 	 * Store given query builder instance
-	 * 
 	 * @param QueryBuilder $qb
 	 * @return QueryBuilder
 	 */
@@ -62,10 +52,8 @@ class QueryBuilder extends Mapped
 		$this->qb = $qb;
 	}
 
-	
 	/**
 	 * Filter items in data source
-	 *
 	 * @param string $column
 	 * @param string $operation
 	 * @param string $value
@@ -93,7 +81,7 @@ class QueryBuilder extends Mapped
 					$conds[] = "{$this->mapping[$column]} $t ?$nextParamId";
 					$this->qb->setParameter(
 						$nextParamId++,
-						$t === self::LIKE || $t === self::NOT_LIKE ? Utils\WildcardHelper::formatLikeStatementWildcards($value) : $value
+						$t === self::LIKE || $t === self::NOT_LIKE ? WildcardHelper::formatLikeStatementWildcards($value) : $value
 					);
 				}
 			}
@@ -114,7 +102,7 @@ class QueryBuilder extends Mapped
 				$this->qb->andWhere("{$this->mapping[$column]} $operation ?$nextParamId");
 				$this->qb->setParameter(
 					$nextParamId,
-					$operation === self::LIKE || $operation === self::NOT_LIKE ? Utils\WildcardHelper::formatLikeStatementWildcards($value) : $value
+					$operation === self::LIKE || $operation === self::NOT_LIKE ? WildcardHelper::formatLikeStatementWildcards($value) : $value
 				);
 			}
 		}
@@ -122,10 +110,8 @@ class QueryBuilder extends Mapped
 		return $this;
 	}
 
-
 	/**
 	 * Sort data source
-	 * 
 	 * @param string $column
 	 * @param string $order
 	 * @return QueryBuilder
@@ -141,10 +127,8 @@ class QueryBuilder extends Mapped
 		return $this;
 	}
 
-
 	/**
 	 * Reduce data source to given $count starting from $start
-	 * 
 	 * @param integer $count
 	 * @param integer $start
 	 * @return QueryBuilder
@@ -162,10 +146,8 @@ class QueryBuilder extends Mapped
 		return $this;
 	}
 
-
 	/**
 	 * Get iterator over data source items
-	 *
 	 * @return \ArrayIterator
 	 */
 	public function getIterator()
@@ -173,10 +155,8 @@ class QueryBuilder extends Mapped
 		return new \ArrayIterator($this->fetch());
 	}
 
-
 	/**
 	 * Fetches and returns the result data.
-	 * 
 	 * @return array
 	 */
 	public function fetch()
@@ -202,7 +182,6 @@ class QueryBuilder extends Mapped
 
 	/**
 	 * Returns hydrated column name based on the mapping type.
-	 * 
 	 * @param string $column
 	 * @return string
 	 */
@@ -217,11 +196,9 @@ class QueryBuilder extends Mapped
 		}
 	}
 
-
 	/**
 	 * Detect the mapping type.
 	 * It is detected from type of SELECT expressions.
-	 *
 	 * @return integer
 	 */
 	protected function detectMappingType()
@@ -238,7 +215,6 @@ class QueryBuilder extends Mapped
 
 	/**
 	 * Count items in data source
-	 *
 	 * @return integer
 	 */
 	public function count()
