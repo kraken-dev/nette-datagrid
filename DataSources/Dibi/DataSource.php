@@ -60,7 +60,8 @@ class DataSource extends DataSources\DataSource
 	 */
 	public function getFilterItems($column)
 	{
-		throw new \NotImplementedException;
+		$ds=clone $this->ds;
+		return $ds->applyLimit(NULL)->toFluent()->removeClause('select')->select()->distinct($column)->fetchPairs($column, $column);
 	}
 
 	/**
