@@ -221,6 +221,7 @@ class QueryBuilder extends DataSources\Mapped
 
 	/**
 	 * Count items in data source
+	 * @param string $column name
 	 * @return integer
 	 */
 	public function count()
@@ -241,6 +242,22 @@ class QueryBuilder extends DataSources\Mapped
 
 	public function getFilterItems($column)
 	{
-		throw new \NotImplementedException;
+		if (!$this->hasColumn($column)) {
+			throw new \InvalidArgumentException('Trying to filter data source by unknown column.');
+			}
+
+		$query=clone $this->qb->getQuery();
+		$query->setParameters($this->qb->getQuery()->getParameters());
+		$query->setHint(Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS, array(__NAMESPACE__.'\Utils\DistinctASTWalker'));
+		$query->setMaxResults(NULL)->setFirstResult(NULL);
+		$query->setHint('distinct', $this->mapping[$column]);
+		$r=array_map(
+			function($row) use($column) {
+				return $row[$column];
+				},
+			$query->getArrayResult()
+			);
+		return array_combine($r, $r);
 	}
 }
+

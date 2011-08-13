@@ -50,7 +50,7 @@ class DataSource extends DataSources\DataSource
 	 */
 	public function hasColumn($name)
 	{
-		throw new \NotSupportedException;
+		return in_array($name, $this->getColumns());
 	}
 
 	/**
@@ -124,6 +124,9 @@ class DataSource extends DataSources\DataSource
 	 */
 	public function sort($column, $order = IDataSource::ASCENDING)
 	{
+		if (!$this->hasColumn($column)) {
+			throw new \InvalidArgumentException("Column '$column' not exist.");
+		}
 		$this->ds->orderBy($column, $order === self::ASCENDING ? 'ASC' : 'DESC');
 
 		return $this;
