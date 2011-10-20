@@ -792,9 +792,9 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 	 * Template factory.
 	 * @return Nette\Templating\ITemplate
 	 */
-	protected function createTemplate()
+	protected function createTemplate($class = NULL)
 	{
-		$template = parent::createTemplate();
+		$template = parent::createTemplate($class);
 		if ($this->getTranslator() !== NULL) {
 			$template->setTranslator($this->getTranslator());
 		}
@@ -823,7 +823,7 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		$form = new Nette\Application\UI\Form($this, $name);
 		$form->setTranslator($this->getTranslator());
 		Nette\Forms\Controls\BaseControl::$idMask = 'frm-datagrid-' . $this->getUniqueId() . '-%s-%s';
-		$form->onSubmit[] = array($this, 'formSubmitHandler');
+		$form->onSuccess[] = array($this, 'formSubmitHandler');
 
 		$form->addSubmit('resetSubmit', 'Reset state');
 		$form->addSubmit('filterSubmit', 'Apply filters');
