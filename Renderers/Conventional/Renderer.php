@@ -112,6 +112,8 @@ class Conventional extends Nette\Object implements IRenderer
 
 	/** @var array  of function(Nette\Utils\Html $action, DibiRow $data) */
 	public $onActionRender;
+        
+        private $columnRenderers = array();
 
 
 
@@ -425,50 +427,24 @@ class Conventional extends Nette\Object implements IRenderer
 
 		// headers
 		foreach ($this->dataGrid->getColumns() as $column) {
-			$value = $text = $column->caption;
-
-			if ($column->isOrderable()) {
-				$i = 1;
-				parse_str($this->dataGrid->order, $list);
-				foreach ($list as $field => $dir) {
-					$list[$field] = array($dir, $i++);
-				}
-
-				if (isset($list[$column->getName()])) {
-					$a = $list[$column->getName()][0] === 'a';
-					$d = $list[$column->getName()][0] === 'd';
-				} else {
-					$a = $d = FALSE;
-				}
-
-				if (count($list) > 1 && isset($list[$column->getName()])) {
-					$text .= Html::el('span')->setHtml($list[$column->getName()][1]);
-				}
-
-				$up = clone $down = Html::el('a')->addClass(Columns\Column::$ajaxClass);
-				$up->addClass($a ? 'active' : '')->href($column->getOrderLink('a'))
-					->add(Html::el('span')->class('up'));
-				$down->addClass($d ? 'active' : '')->href($column->getOrderLink('d'))
-					->add(Html::el('span')->class('down'));
-				$positioner = Html::el('span')->class('positioner')->add($up)->add($down);
-				$active = $a || $d;
-
-				$value = (string) Html::el('a')->href($column->getOrderLink())
-					->addClass(Columns\Column::$ajaxClass)->setHtml($text) . $positioner;
-			} else {
-				$value = (string) Html::el('p')->setText($value);
-			}
-
-			$cell = $this->getWrapper('row.header cell container')->setHtml($value);
-			$cell->attrs = $column->getHeaderPrototype()->attrs;
-			$cell->addClass(isset($active) && $active == TRUE ? $this->getValue('row.header cell .active') : NULL);
-			if ($column instanceof Columns\ActionColumn) $cell->addClass('actions');
+                        $renderer = $this->getColumnRendererById($column->getRendererId());
+                        $cell = $renderer->generateHeaderCell($column);
 
 			$row->add($cell);
 		}
 
 		return $row;
 	}
+        
+        public function getSubmitControl() {
+                $form = $this->dataGrid->getForm(TRUE);
+
+		$submitControl = $form['filterSubmit']->control;
+		$submitControl->addClass($this->getValue('row.filter control .submit'));
+		$submitControl->title = $submitControl->value;
+                
+                return $submitControl;
+        }
 
 
 	/**
@@ -478,43 +454,16 @@ class Conventional extends Nette\Object implements IRenderer
 	protected function generateFilterRow()
 	{
 		$row = $this->getWrapper('row.filter container');
-		$form = $this->dataGrid->getForm(TRUE);
-
-		$submitControl = $form['filterSubmit']->control;
-		$submitControl->addClass($this->getValue('row.filter control .submit'));
-		$submitControl->title = $submitControl->value;
+		
 
 		foreach ($this->dataGrid->getColumns() as $column) {
-			$cell = $this->getWrapper('row.filter cell container');
-
-			// TODO: set on filters too?
-			$cell->attrs = $column->getCellPrototype()->attrs;
-
-			if ($column instanceof Columns\ActionColumn) {
-				$value = (string) $submitControl;
-				$cell->addClass('actions');
-
-			} else {
-				if ($column->hasFilter()) {
-					$filter = $column->getFilter();
-					if ($filter instanceof Filters\SelectboxFilter) {
-						$class = $this->getValue('row.filter control .select');
-					} else {
-						$class = $this->getValue('row.filter control .input');
-					}
-					$control = $filter->getFormControl()->control;
-					$control->addClass($class);
-					$value = (string) $control;
-				} else {
-					$value = '';
-				}
-			}
-
-			$cell->setHtml($value);
+			$renderer = $this->getColumnRendererById($column->getRendererId());
+                        $cell = $renderer->generateFilterCell($column);
 			$row->add($cell);
 		}
 
 		if (!$this->dataGrid->hasActions()) {
+                        $submitControl = $this->getSubmitControl();
 			$submitControl->addStyle('display: none');
 			$row->add($submitControl);
 		}
@@ -550,37 +499,8 @@ class Conventional extends Nette\Object implements IRenderer
 
 		// content
 		foreach ($this->dataGrid->getColumns() as $column) {
-			$cell = $this->getWrapper('row.content cell container');
-			$cell->attrs = $column->getCellPrototype()->attrs;
-
-			if ($column instanceof Columns\ActionColumn) {
-				$value = '';
-				foreach ($this->dataGrid->getActions() as $action) {
-					if (!is_callable($action->ifDisableCallback) || !callback($action->ifDisableCallback)->invokeArgs(array($data))) {
-						$html = $action->getHtml();
-						$html->title($this->dataGrid->translate($html->title));
-						$action->generateLink(array($primary => $data[$primary]));
-						$this->onActionRender($html, $data);
-						$value .= $html->render() . ' ';
-					} else
-						$value .= Html::el('span')->setText($this->dataGrid->translate($action->getHtml()->title))->render() . ' ';
-				}
-				$cell->addClass('actions');
-
-			} else {
-				if ($data instanceof \ArrayAccess) {
-					if (!isset($data[$column->getName()])) {
-						throw new \InvalidArgumentException("Non-existing column '" . $column->getName() . "' in datagrid '" . $this->dataGrid->getName() . "'");
-					}
-				} else {
-					if (!array_key_exists($column->getName(), $data)) {
-						throw new \InvalidArgumentException("Non-existing column '" . $column->getName() . "' in datagrid '" . $this->dataGrid->getName() . "'");
-					}
-				}
-				$value = $column->formatContent($data[$column->getName()], $data);
-			}
-
-			$cell->setHtml((string)$value);
+			$renderer = $this->getColumnRendererById($column->getRendererId());
+			$cell = $renderer->generateContentCell($column, $data, $primary);
 			$this->onCellRender($cell, $column->getName(), !($column instanceof Columns\ActionColumn) ? $data[$column->getName()] : $data);
 			$row->add($cell);
 		}
@@ -625,13 +545,28 @@ class Conventional extends Nette\Object implements IRenderer
 
 		return $row;
 	}
+        
+        public function getColumnRendererById($id) {
+                if (!isset($this->columnRenderers[$id])) {
+                        $className = "\\DataGrid\\Renderers\\" . $id . "Renderer";
+                        //try {
+                                $this->columnRenderers[$id] = new $className($this);
+//                        }
+//                        catch (...) {
+//                                $this->columnRenderers[$id] = new ColumnRenderer;
+//                        }
+                }
+                
+                return $this->columnRenderers[$id];
+        }
 
 
 	/**
 	 * @param  string
 	 * @return Nette\Utils\Html
 	 */
-	protected function getWrapper($name)
+        // TODO: move to column renderer?
+	public function getWrapper($name)
 	{
 		$data = $this->getValue($name);
 		return $data instanceof Html ? clone $data : Html::el($data);
@@ -642,7 +577,8 @@ class Conventional extends Nette\Object implements IRenderer
 	 * @param  string
 	 * @return string
 	 */
-	protected function getValue($name)
+        // TODO: move to column renderer?
+	public function getValue($name)
 	{
 		$name = explode(' ', $name);
 		if (count($name) == 3) {

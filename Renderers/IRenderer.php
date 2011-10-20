@@ -18,5 +18,7 @@ interface IRenderer
 	 * @return string
 	 */
 	function render(\DataGrid\DataGrid $dataGrid);
+        
+        function getColumnRendererById($id);
 
 }

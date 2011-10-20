@@ -192,6 +192,10 @@ abstract class Column extends Nette\ComponentModel\Container implements IColumn
 	{
 		return;
 	}
+        
+        public function getRendererId() {
+                return "Column";
+        }
 
 
 

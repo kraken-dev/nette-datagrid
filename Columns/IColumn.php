@@ -55,5 +55,8 @@ interface IColumn
 	 * @return void
 	 */
 	function applyFilter($value);
+        
+        
+        function getRendererId();
 
 }
