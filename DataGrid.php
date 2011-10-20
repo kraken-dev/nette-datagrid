@@ -126,7 +126,6 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 	public function setDataSource(DataSources\IDataSource $dataSource)
 	{
 		$this->dataSource = $dataSource;
-		$this->paginator->itemCount = count($dataSource);
 		return $this;
 	}
 
