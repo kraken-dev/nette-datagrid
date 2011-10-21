@@ -14,30 +14,32 @@ use Nette, Nette\Utils\Html, DataGrid, DataGrid\Filters;
  */
 abstract class Column extends Nette\ComponentModel\Container implements IColumn
 {
-	/** @var Html  table header element template */
-	protected $header;
+		/** @var Html  table header element template */
+		protected $header;
 
-	/** @var Html  table cell element template */
-	protected $cell;
+		/** @var Html  table cell element template */
+		protected $cell;
 
-	/** @var string */
-	protected $caption;
+		/** @var string */
+		protected $caption;
 
-	/** @var int */
-	protected $maxLength = 100;
+		/** @var int */
+		protected $maxLength = 100;
 
-	/** @var array  of arrays('pattern' => 'replacement') */
-	public $replacement;
+		/** @var array  of arrays('pattern' => 'replacement') */
+		public $replacement;
 
-	/** @var array  of callback functions */
-	public $formatCallback = array();
+		/** @var array  of callback functions */
+		public $formatCallback = array();
 
-	/** @var bool */
-	public $orderable = TRUE;
+		/** @var bool */
+		public $orderable = TRUE;
 
-	/** @var string */
-	public static $ajaxClass = 'datagrid-ajax';
+		/** @var string */
+		public static $ajaxClass = 'datagrid-ajax';
 
+		/** @var string or DataGrid\Renderes\Column* */
+		protected $renderer = "Column";
 
 	/**
 	 * Data grid column constructor.
@@ -193,47 +195,150 @@ abstract class Column extends Nette\ComponentModel\Container implements IColumn
 		return;
 	}
         
-        public function getRendererId() {
-                return "Column";
+        /**
+         * Return a renderer.
+         * It might be a renderer ID which is then used to get the actual 
+         * renderer, or a renderer itself
+         * @return string or DataGrid\Renderers\Column
+         */
+        public function getRenderer() {
+                return $this->renderer;
         }
 
+        public function setRenderer($r) {
+                if (!is_string($r) && !($r instanceof \DataGrid\Renderers\Column\IColumnRenderer))
+                        throw new \Nette\InvalidArgumentException("Renderer can only be string id or renderer object itself");
+                $this->renderer = $r;
 
+                return $this;
+        }
 
-	/********************* Default sorting and filtering *********************/
+        /*         * ******************* Default sorting and filtering ******************** */
 
+        /**
+         * Adds default sorting to data grid.
+         * @param string
+         * @return Column  provides a fluent interface
+         */
+        public function addDefaultSorting($order = 'ASC') {
+                $orders = array('ASC', 'DESC', 'asc', 'desc', 'A', 'D', 'a', 'd');
+                if (!in_array($order, $orders)) {
+                        throw new \InvalidArgumentException("Order must be in '" . implode(', ', $orders) . "', '$order' given.");
+                }
 
+                parse_str($this->getDataGrid()->defaultOrder, $list);
+                $list[$this->getName()] = strtolower($order[0]);
+                $this->getDataGrid()->defaultOrder = http_build_query($list, '', '&');
 
-	/**
-	 * Adds default sorting to data grid.
-	 * @param string
-	 * @return Column  provides a fluent interface
-	 */
-	public function addDefaultSorting($order = 'ASC')
-	{
-		$orders = array('ASC', 'DESC', 'asc', 'desc', 'A', 'D', 'a', 'd');
-		if (!in_array($order, $orders)) {
-			throw new \InvalidArgumentException("Order must be in '" . implode(', ', $orders) . "', '$order' given.");
-		}
+                return $this;
+        }
 
-		parse_str($this->getDataGrid()->defaultOrder, $list);
-		$list[$this->getName()] = strtolower($order[0]);
-		$this->getDataGrid()->defaultOrder = http_build_query($list, '', '&');
+        /**
+         * Adds default filtering to data grid.
+         * @param string
+         * @return Column  provides a fluent interface
+         */
+        public function addDefaultFiltering($value) {
+                parse_str($this->getDataGrid()->defaultFilters, $list);
+                $list[$this->getName()] = $value;
+                $this->getDataGrid()->defaultFilters = http_build_query($list, '', '&');
 
-		return $this;
-	}
+                return $this;
+        }
 
+        /**
+         * Removes data grid's default sorting.
+         * @return Column  provides a fluent interface
+         */
+        public function removeDefaultSorting() {
+                parse_str($this->getDataGrid()->defaultOrder, $list);
+                if (isset($list[$this->getName()]))
+                        unset($list[$this->getName()]);
+                $this->getDataGrid()->defaultOrder = http_build_query($list, '', '&');
 
-	/**
-	 * Adds default filtering to data grid.
-	 * @param string
-	 * @return Column  provides a fluent interface
-	 */
-	public function addDefaultFiltering($value)
-	{
-		parse_str($this->getDataGrid()->defaultFilters, $list);
-		$list[$this->getName()] = $value;
-		$this->getDataGrid()->defaultFilters = http_build_query($list, '', '&');
+                return $this;
+        }
 
+        /**
+         * Removes data grid's default filtering.
+         * @return Column  provides a fluent interface
+         */
+        public function removeDefaultFiltering() {
+                parse_str($this->getDataGrid()->defaultFilters, $list);
+                if (isset($list[$this->getName()]))
+                        unset($list[$this->getName()]);
+                $this->getDataGrid()->defaultFilters = http_build_query($list, '', '&');
+
+                return $this;
+        }
+
+        /*         * ******************* filter factories ******************** */
+
+        /**
+         * Alias for method addTextFilter().
+         * @return Filters\IColumnFilter
+         */
+        public function addFilter() {
+                return $this->addTextFilter();
+        }
+
+        /**
+         * Adds single-line text filter input to data grid.
+         * @return Filters\IColumnFilter
+         * @throws \InvalidArgumentException
+         */
+        public function addTextFilter() {
+                $this->_addFilter(new Filters\TextFilter);
+                return $this->getFilter();
+        }
+
+        /**
+         * Adds single-line text date filter input to data grid.
+         * Optional dependency on DatePicker class (@link http://nettephp.com/extras/datepicker)
+         * @return Filters\IColumnFilter
+         * @throws \InvalidArgumentException
+         */
+        public function addDateFilter() {
+                $this->_addFilter(new Filters\DateFilter);
+                return $this->getFilter();
+        }
+
+        /**
+         * Adds check box filter input to data grid.
+         * @return Filters\IColumnFilter
+         * @throws \InvalidArgumentException
+         */
+        public function addCheckboxFilter() {
+                $this->_addFilter(new Filters\CheckboxFilter);
+                return $this->getFilter();
+        }
+
+        /**
+         * Adds select box filter input to data grid.
+         * @param  array   items from which to choose
+         * @param  bool    add empty first item to selectbox?
+         * @param  bool    translate all items in selectbox?
+         * @return Filters\IColumnFilter
+         * @throws \InvalidArgumentException
+         */
+        public function addSelectboxFilter($items = NULL, $firstEmpty = TRUE, $translateItems = TRUE) {
+                $this->_addFilter(new Filters\SelectboxFilter($items, $firstEmpty));
+                return $this->getFilter()->translateItems($translateItems);
+        }
+
+        /**
+         * Internal filter adding routine.
+         * @param  Filters\IColumnFilter $filter
+         * @return void
+         */
+        private function _addFilter(Filters\IColumnFilter $filter) {
+                if ($this->hasFilter()) {
+                        $this->getComponent('filters')->removeComponent($this->getFilter());
+                }
+                $this->getComponent('filters')->addComponent($filter, $this->getName());
+        }
+
+<<<<<<< HEAD
 		return $this;
 	}
 
@@ -347,3 +452,6 @@ abstract class Column extends Nette\ComponentModel\Container implements IColumn
 		$this->getComponent('filters')->addComponent($filter, $this->getName());
 	}
 }
+=======
+}
+>>>>>>> 661d96e... Modified the column renderer factory - now there is a method setColumnRenderer by which the specific renderer can be assigned from user code

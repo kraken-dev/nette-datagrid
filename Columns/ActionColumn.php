@@ -1,7 +1,9 @@
 <?php
 
 namespace DataGrid\Columns;
-use Nette, DataGrid;
+
+use Nette,
+    DataGrid;
 
 /**
  * Representation of data grid action column.
@@ -15,6 +17,8 @@ use Nette, DataGrid;
  */
 class ActionColumn extends Column implements \ArrayAccess
 {
+	/** @var string or DataGrid\Renderes\Column* */
+	protected $renderer = "ActionColumn";
 
 	/**
 	 * Action column constructor.

@@ -482,8 +482,8 @@ class Conventional extends Nette\Object implements IRenderer
 		$form = $this->dataGrid->getForm(TRUE);
 		$row = $this->getWrapper('row.content container');
 
+		$primary = $this->dataGrid->keyName;
 		if ($this->dataGrid->hasOperations() || $this->dataGrid->hasActions()) {
-			$primary = $this->dataGrid->keyName;
 			if (!isset($data[$primary])) {
 				throw new \InvalidArgumentException("Invalid name of key for group operations or actions. Column '" . $primary . "' does not exist in data source.");
 			}
@@ -499,7 +499,7 @@ class Conventional extends Nette\Object implements IRenderer
 
 		// content
 		foreach ($this->dataGrid->getColumns() as $column) {
-			$renderer = $this->getColumnRendererById($column->getRendererId());
+			$renderer = $this->getColumnRenderer($column->getRenderer());
 			$cell = $renderer->generateContentCell($column, $data, $primary);
 			$this->onCellRender($cell, $column->getName(), !($column instanceof Columns\ActionColumn) ? $data[$column->getName()] : $data);
 			$row->add($cell);
@@ -546,21 +546,45 @@ class Conventional extends Nette\Object implements IRenderer
 		return $row;
 	}
         
-        public function getColumnRendererById($id) {
-                if (!isset($this->columnRenderers[$id])) {
-                        $className = "\\DataGrid\\Renderers\\" . $id . "Renderer";
-                        //try {
-                                $this->columnRenderers[$id] = new $className($this);
-//                        }
-//                        catch (...) {
-//                                $this->columnRenderers[$id] = new ColumnRenderer;
-//                        }
-                }
-                
-                return $this->columnRenderers[$id];
-        }
+	/**
+	 * Return the column renderer according to the id
+	 * and cache it, so the next call with the same id will
+	 * return the same object
+	 * If istance of IColumnRenderer is given instead of the id,
+	 * simply pass it through
+	 * @param type $id
+	 * @return type
+	 */
+	protected function getColumnRenderer($id) {
+		if ($id instanceof Column\IColumnRenderer)
+			return $id;
 
+		if (!is_string($id))
+			throw new \Nette\InvalidArgumentException("Renderer id must be a string");
 
+		// in columnRenderers array may be strings as well as renderer instances
+		if (!isset($this->columnRenderers[$id])) {
+			$this->columnRenderers[$id] = "\\DataGrid\\Renderers\\Column\\" . $id . "Renderer";
+		}
+
+		if (is_string($this->columnRenderers[$id])) {
+			//try {
+			$this->columnRenderers[$id] = new $this->columnRenderers[$id]($this);
+//			}
+//			catch (...) {
+//				$this->columnRenderers[$id] = new ColumnRenderer;
+//			}
+		}
+		return $this->columnRenderers[$id];
+	}
+
+	public function setColumnRenderer($id, $renderer) {
+		if (!is_string($renderer) && !($renderer instanceof \DataGrid\Renderers\Column\IColumnRenderer))
+			throw new \Nette\InvalidArgumentException("Renderer can only be string renderer classname or renderer object itself.");
+		$this->columnRenderers[$id] = $renderer;
+		return $this;
+	}
+	
 	/**
 	 * @param  string
 	 * @return Nette\Utils\Html
