@@ -61,7 +61,7 @@ class ColumnRenderer implements IColumnRenderer {
 
                 $cell = $this->gridRenderer->getWrapper('row.header cell container')->setHtml($value);
                 $cell->attrs = $column->getHeaderPrototype()->attrs;
-                $cell->addClass(isset($active) && $active == TRUE ? $this->getValue('row.header cell .active') : NULL);
+        		$cell->addClass(isset($active) && $active == TRUE ? $this->gridRenderer->getValue('row.header cell .active') : NULL);
 
                 return $cell;
         }

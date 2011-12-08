@@ -1,6 +1,6 @@
 <?php
 
-namespace DataGrid\DataSources\Nette;
+namespace DataGrid\DataSources\NetteDB;
 
 use \DataGrid\DataSources\IDataSource,
     \DataGrid\DataSources,
@@ -53,9 +53,10 @@ class DB extends DataSources\Mapped {
      * @throws \InvalidArgumentException
      * @return IDataSource
      */
-    public function filter($column, $operation = IDataSource::EQUAL, $value = NULL, $chainType = NULL) {
-        if (!$this->hasColumn($column)) {
-            throw new \InvalidArgumentException('Trying to filter data source by unknown column.');
+	public function filter($column, $operation = IDataSource::EQUAL, $value = NULL, $chainType = NULL) {
+		$col=$column;
+		if ($this->hasColumn($column)) {
+			$col = $this->mapping[$column];
         }
         
         if (is_array($operation)) {
@@ -78,7 +79,7 @@ class DB extends DataSources\Mapped {
         foreach ($operation as $o) {
             $this->validateFilterOperation($o);
 
-            $c = "{$this->mapping[$column]} $o";
+            $c = "$col $o";
             if ($o !== self::IS_NULL && $o !== self::IS_NOT_NULL) {
                 $c .= " ?";
 
@@ -104,11 +105,12 @@ class DB extends DataSources\Mapped {
      * @return IDataSource
      */
     public function sort($column, $order = IDataSource::ASCENDING) {
-        if (!$this->hasColumn($column)) {
-            throw new \InvalidArgumentException('Trying to sort data source by unknown column.');
-        }
-        
-        $this->selection->order($this->mapping[$column] . " " . ($order === self::ASCENDING ? 'ASC' : 'DESC'));
+		if (!$this->hasColumn($column)) {
+			$this->selection->order($column . " " . ($order === self::ASCENDING ? 'ASC' : 'DESC'));
+		}
+		else {
+			$this->selection->order($this->mapping[$column] . " " . ($order === self::ASCENDING ? 'ASC' : 'DESC'));
+		}
 
         return $this;
     }
@@ -168,8 +170,9 @@ class DB extends DataSources\Mapped {
      * @param string Column name
      * @return array
      */
-    public function getFilterItems($column) {
-        throw new Nette\NotImplementedException;
+	public function getFilterItems($column) {
+		$query = clone $this->selection;
+		return $query->select($column)->group($column)->fetchPairs($column, $column);
     }
 
     /**
