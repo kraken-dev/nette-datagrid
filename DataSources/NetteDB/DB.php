@@ -30,13 +30,13 @@ class DB extends DataSources\Mapped {
 
     /**
      * Store given selection
-     * @param \DibiFluent
+     * @param Table\Selection
      * @return IDataSource
      */
     public function __construct(Table\Selection $sel) {
         $this->selection = $sel;
     }
-    
+
     public function setMapping(array $mapping) {
             parent::setMapping($mapping);
             foreach ($mapping as $k => $m) {
@@ -44,13 +44,6 @@ class DB extends DataSources\Mapped {
             }
     }
     
-    public function test() {
-            foreach ($this->selection as $row) {
-                    dump($row->toArray());
-            }
-            exit;
-    }
-
     /**
      * Add filtering onto specified column
      * @param string column name
