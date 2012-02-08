@@ -38,12 +38,12 @@ class TextColumn extends Column
 
 		// truncate
 		if ($this->maxLength != 0) {
-			if ($value instanceof Nette\Web\Html) {
+			if ($value instanceof Nette\Utils\Html) {
 				$text = $value->getText();
-				$text = Nette\String::truncate($text, $this->maxLength);
+				$text = Nette\Utils\Strings::truncate($text, $this->maxLength);
 				$value->setText($text);
 			} else {
-				$value = Nette\String::truncate($value, $this->maxLength);
+				$value = Nette\Utils\Strings::truncate($value, $this->maxLength);
 			}
 		}
 
