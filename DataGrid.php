@@ -1027,7 +1027,7 @@ implements \ArrayAccess
 	 */
 	protected function getStateSession()
 	{
-		return $this->getSession()->getNamespace('Nette.Extras.DataGrid/' . $this->getName() . '/states');
+		return $this->getSession()->getSection('Nette.Extras.DataGrid/' . $this->getName() . '/states');
 	}
 
 	/**
@@ -1035,7 +1035,7 @@ implements \ArrayAccess
 	 */
 	protected function getSession()
 	{
-		return Nette\Environment::getSession();
+		return \Nette\Environment::getSession();
 	}
 
 	/**
