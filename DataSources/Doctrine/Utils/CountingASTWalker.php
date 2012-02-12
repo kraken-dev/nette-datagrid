@@ -1,10 +1,15 @@
 <?php
 
 namespace DataGrid\DataSources\Doctrine\Utils;
-use Doctrine, Doctrine\ORM\Query\AST;
 
-class CountingASTWalker extends Doctrine\ORM\Query\TreeWalkerAdapter
+use Doctrine\ORM\Query\AST;
+
+class CountingASTWalker
+extends \Doctrine\ORM\Query\TreeWalkerAdapter
 {
+	/**
+	 * @param AST\SelectStatement $ast
+	 */
 	public function walkSelectStatement(AST\SelectStatement $ast)
 	{
 			$parent = $parentName = NULL;

@@ -13,27 +13,22 @@ use DataGrid\DataSources\IDataSource,
  * @author Štěpán Svoboda
  * @author Petr Morávek
  */
-class Fluent extends DataSources\Mapped
+class Fluent
+extends DataSources\Mapped
 {
-	/**
-	 * @var \DibiFluent Dibi fluent instance
-	 */
+	/** @var \DibiFluent Dibi fluent instance */
 	private $df;
 
-	/**
-	 * @var array Fetched data
-	 */
+	/** @var array Fetched data */
 	private $data;
 
-	/**
-	 * @var int Total data count
-	 */
+	/** @var int Total data count */
 	private $count;
+
 
 	/**
 	 * Store given dibi data fluent instance
-	 * @param \DibiFluent
-	 * @return IDataSource
+	 * @param \DibiFluent $df
 	 */
 	public function __construct(\DibiFluent $df)
 	{
@@ -42,22 +37,22 @@ class Fluent extends DataSources\Mapped
 
 	/**
 	 * Add filtering onto specified column
-	 * @param string column name
-	 * @param string filter
-	 * @param string|array operation mode
-	 * @param string chain type (if third argument is array)
-	 * @throws \InvalidArgumentException
-	 * @return IDataSource
+	 * @param string $column column name
+	 * @param string $operation filter
+	 * @param string|array $value operation mode
+	 * @param string $chainType chain type (if third argument is array)
+	 * @return Fluent (fluent)
+	 * @throws \Nette\InvalidArgumentException
 	 */
 	public function filter($column, $operation = IDataSource::EQUAL, $value = NULL, $chainType = NULL)
 	{
 		if (!$this->hasColumn($column)) {
-			throw new \InvalidArgumentException('Trying to filter data source by unknown column.');
+			throw new \Nette\InvalidArgumentException('Trying to filter data source by unknown column.');
 		}
 
 		if (is_array($operation)) {
 			if ($chainType !== self::CHAIN_AND && $chainType !== self::CHAIN_OR) {
-				throw new \InvalidArgumentException('Invalid chain operation type.');
+				throw new \Nette\InvalidArgumentException('Invalid chain operation type.');
 			}
 			$conds = array();
 			foreach ($operation as $t) {
@@ -66,8 +61,9 @@ class Fluent extends DataSources\Mapped
 					$conds[] = array('%n', $this->mapping[$column], $t);
 				} else {
 					$modifier = is_double($value) ? dibi::FLOAT : dibi::TEXT;
-					if ($operation === self::LIKE || $operation === self::NOT_LIKE)
+					if ($operation === self::LIKE || $operation === self::NOT_LIKE) {
 						$value = DataSources\Utils\WildcardHelper::formatLikeStatementWildcards($value);
+					}
 
 					$conds[] = array('%n', $this->mapping[$column], $t, '%' . $modifier, $value);
 				}
@@ -87,8 +83,9 @@ class Fluent extends DataSources\Mapped
 				$this->qb->where('%n', $this->mapping[$column], $operation);
 			} else {
 				$modifier = is_double($value) ? dibi::FLOAT : dibi::TEXT;
-				if ($operation === self::LIKE || $operation === self::NOT_LIKE)
+				if ($operation === self::LIKE || $operation === self::NOT_LIKE) {
 					$value = DataSources\Utils\WildcardHelper::formatLikeStatementWildcards($value);
+				}
 
 				$this->df->where('%n', $this->mapping[$column], $operation, '%' . $modifier, $value);
 			}
@@ -99,15 +96,15 @@ class Fluent extends DataSources\Mapped
 
 	/**
 	 * Adds ordering to specified column
-	 * @param string column name
-	 * @param string one of ordering types
-	 * @throws \InvalidArgumentException
-	 * @return IDataSource
+	 * @param string $column column name
+	 * @param string $order one of ordering types
+	 * @return Fluent (fluent)
+	 * @throws \Nette\InvalidArgumentException
 	 */
 	public function sort($column, $order = IDataSource::ASCENDING)
 	{
 		if (!$this->hasColumn($column)) {
-			throw new \InvalidArgumentException('Trying to sort data source by unknown column.');
+			throw new \Nette\InvalidArgumentException('Trying to sort data source by unknown column.');
 		}
 
 		$this->df->orderBy($this->mapping[$column], $order === self::ASCENDING ? 'ASC' : 'DESC');
@@ -117,20 +114,24 @@ class Fluent extends DataSources\Mapped
 
 	/**
 	 * Reduce the result starting from $start to have $count rows
-	 * @param int the number of results to obtain
-	 * @param int the offset
-	 * @throws \OutOfRangeException
-	 * @return IDataSource
+	 * @param int $count the number of results to obtain
+	 * @param int $start the offset
+	 * @return Fluent (fluent)
+	 * @throws \Nette\OutOfRangeException
 	 */
 	public function reduce($count, $start = 0)
 	{
 		if ($count == NULL || $count > 0) { //intentionally ==
 			$this->df->limit($count == NULL ? 0 : $count);
-		} else throw new \OutOfRangeException;
+		} else {
+			throw new \Nette\OutOfRangeException;
+		}
 
 		if ($start == NULL || ($start > 0 && $start < count($this))) {
 			$this->df->offset($start == NULL ? 0 : $start);
-		} else throw new \OutOfRangeException;
+		} else {
+			throw new \Nette\OutOfRangeException;
+		}
 
 		return $this;
 	}
@@ -155,7 +156,7 @@ class Fluent extends DataSources\Mapped
 
 	/**
 	 * Count items in data source
-	 * @return integer
+	 * @return int
 	 * @todo: if there is a group by clause in the query, count it correctly
 	 */
 	public function count()
@@ -168,12 +169,12 @@ class Fluent extends DataSources\Mapped
 				->removeClause('order by')
 				->select('count(*)');
 
-		return $this->count = (int) $query->fetchSingle();
+		return $this->count = (int)$query->fetchSingle();
 	}
 
 	/**
 	 * Return distinct values for a selectbox filter
-	 * @param string Column name
+	 * @param string $column Column name
 	 * @return array
 	 */
 	public function getFilterItems($column)
@@ -183,7 +184,6 @@ class Fluent extends DataSources\Mapped
 
 	/**
 	 * Clone dibi fluent instance
-	 * @return void
 	 */
 	public function __clone()
 	{

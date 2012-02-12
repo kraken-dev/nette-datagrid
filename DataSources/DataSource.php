@@ -2,20 +2,19 @@
 
 namespace DataGrid\DataSources;
 
-use Nette;
-
 /**
  * Base class for all data sources
  * @author Michael Moravec
  * @author Štěpán Svoboda
  */
-abstract class DataSource extends Nette\Object implements IDataSource
+abstract class DataSource
+extends \Nette\Object
+implements IDataSource
 {
 	/**
 	 * Validate filter operation
 	 * @param string $operation
-	 * @return void
-	 * @throws Nette\InvalidStateException if operation is not valid
+	 * @throws \Nette\InvalidStateException if operation is not valid
 	 */
 	protected function validateFilterOperation($operation)
 	{
@@ -33,7 +32,7 @@ abstract class DataSource extends Nette\Object implements IDataSource
 		);
 
 		if (!in_array($operation, $types, TRUE)) {
-			throw new Nette\InvalidStateException('Invalid filter operation type.');
+			throw new \Nette\InvalidStateException('Invalid filter operation type.');
 		}
 	}
 }

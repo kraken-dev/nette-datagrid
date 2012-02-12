@@ -7,17 +7,16 @@ namespace DataGrid\DataSources;
  * @author Michael Moravec
  * @author Štěpán Svoboda
  */
-abstract class Mapped extends DataSource
+abstract class Mapped
+extends DataSource
 {
-	/**
-	 * @var array Alias to column mapping
-	 */
+	/** @var array Alias to column mapping */
 	protected $mapping = array();
+
 
 	/**
 	 * Get columns mapping
-	 * @param array
-	 * @return void
+	 * @return array
 	 */
 	public function getMapping()
 	{
@@ -26,8 +25,7 @@ abstract class Mapped extends DataSource
 
 	/**
 	 * Set columns mapping
-	 * @param array
-	 * @return void
+	 * @param array $mapping
 	 */
 	public function setMapping(array $mapping)
 	{
@@ -36,7 +34,8 @@ abstract class Mapped extends DataSource
 
 	/**
 	 * Does datasource have column of given name?
-	 * @return boolean
+	 * @param string $name
+	 * @return bool
 	 */
 	public function hasColumn($name)
 	{

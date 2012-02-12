@@ -10,17 +10,17 @@ namespace DataGrid\Filters;
  * @license    New BSD License
  * @package    Nette\Extras\DataGrid
  */
-interface IColumnFilter {
+interface IColumnFilter
+{
+	/**
+	 * Returns filter's form element.
+	 * @return \Nette\Forms\Controls\BaseControl
+	 */
+	function getFormControl();
 
-        /**
-         * Returns filter's form element.
-         * @return Nette\Forms\FormControl
-         */
-        function getFormControl();
-
-        /**
-         * Gets filter's value, if was filtered.
-         * @return string
-         */
-        public function getValue();
+	/**
+	 * Gets filter's value, if was filtered.
+	 * @return string
+	 */
+	public function getValue();
 }

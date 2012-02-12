@@ -1,7 +1,6 @@
 <?php
 
 namespace DataGrid\Filters;
-use Nette, DataGrid;
 
 /**
  * Base class that implements the basic common functionality to data grid column's filters.
@@ -12,34 +11,25 @@ use Nette, DataGrid;
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-abstract class ColumnFilter extends Nette\ComponentModel\Component implements IColumnFilter
+abstract class ColumnFilter
+extends \Nette\ComponentModel\Component
+implements IColumnFilter
 {
-	/** @var Nette\Forms\Controls\BaseControl  form element */
+	/** @var \Nette\Forms\Controls\BaseControl form element */
 	protected $element;
 
 	/** @var string  value of filter (if was filtered) */
 	protected $value;
 
 
-	public function __construct()
-	{
-		parent::__construct();
-	}
-
-
-
-	/********************* interface DataGrid\Filters\IColumnFilter *********************/
-
-
-
+	/* ******************** interface DataGrid\Filters\IColumnFilter ******************** */
 	/**
 	 * Returns filter's form element.
-	 * @return Nette\Forms\Controls\BaseControl
+	 * @return \Nette\Forms\Controls\BaseControl
 	 */
 	public function getFormControl()
 	{
 	}
-
 
 	/**
 	 * Gets filter's value, if was filtered.
@@ -60,11 +50,9 @@ abstract class ColumnFilter extends Nette\ComponentModel\Component implements IC
 		return $this->value;
 	}
 
-
 	/**
 	 * Sets filter's value.
-	 * @param string
-	 * @return void
+	 * @param string $value
 	 */
 	public function setValue($value)
 	{

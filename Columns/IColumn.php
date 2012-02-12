@@ -10,52 +10,51 @@ namespace DataGrid\Columns;
  * @license    New BSD License
  * @package    Nette\Extras\DataGrid
  */
-interface IColumn {
+interface IColumn
+{
+	/**
+	 * Is column orderable?
+	 * @return bool
+	 */
+	function isOrderable();
 
-        /**
-         * Is column orderable?
-         * @return bool
-         */
-        function isOrderable();
+	/**
+	 * Gets header link (order signal)
+	 * @param string $dir
+	 * @return string
+	 */
+	function getOrderLink($dir = NULL);
 
-        /**
-         * Gets header link (order signal)
-         * @param  string
-         * @return string
-         */
-        function getOrderLink($dir = NULL);
+	/**
+	 * Has column filter box?
+	 * @return bool
+	 */
+	function hasFilter();
 
-        /**
-         * Has column filter box?
-         * @return bool
-         */
-        function hasFilter();
+	/**
+	 * Returns column's filter.
+	 * @return \DataGrid\Filters\IColumnFilter|NULL
+	 */
+	function getFilter();
 
-        /**
-         * Returns column's filter.
-         * @return DataGrid\Filters\IColumnFilter|NULL
-         */
-        function getFilter();
+	/**
+	 * Formats cell's content.
+	 * @param mixed $value
+	 * @return string
+	 */
+	function formatContent($value);
 
-        /**
-         * Formats cell's content.
-         * @param  mixed
-         * @return string
-         */
-        function formatContent($value);
+	/**
+	 * Filters data source.
+	 * @param mixed $value
+	 */
+	function applyFilter($value);
 
-        /**
-         * Filters data source.
-         * @param  mixed
-         * @return void
-         */
-        function applyFilter($value);
-
-        /**
-         * Return a renderer.
-         * It might be a renderer ID which is then used to get the actual 
-         * renderer, or a renderer itself
-         * @return string or DataGrid\Renderers\Column
-         */
-        function getRenderer();
+	/**
+	 * Return a renderer.
+	 * It might be a renderer ID which is then used to get the actual 
+	 * renderer, or a renderer itself
+	 * @return string|\DataGrid\Renderers\Column
+	 */
+	function getRenderer();
 }

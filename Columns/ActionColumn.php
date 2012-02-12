@@ -2,8 +2,8 @@
 
 namespace DataGrid\Columns;
 
-use Nette,
-    DataGrid;
+use Nette\ComponentModel,
+	DataGrid;
 
 /**
  * Representation of data grid action column.
@@ -20,7 +20,8 @@ extends Column
 implements \ArrayAccess
 {
 	/** @var string or DataGrid\Renderes\Column */
-	protected $renderer = "ActionColumn";
+	protected $renderer = 'ActionColumn';
+
 
 	/**
 	 * Action column constructor.
@@ -29,7 +30,7 @@ implements \ArrayAccess
 	public function __construct($caption = 'Actions')
 	{
 		parent::__construct($caption);
-		$this->addComponent(new Nette\ComponentModel\Container, 'actions');
+		$this->addComponent(new ComponentModel\Container, 'actions');
 		$this->removeComponent($this->getComponent('filters'));
 		$this->orderable = FALSE;
 	}
@@ -47,12 +48,12 @@ implements \ArrayAccess
 	 * Returns column's filter.
 	 * @param bool $need throw exception if component doesn't exist?
 	 * @return DataGrid\Filters\IColumnFilter|NULL
-	 * @throws Nette\InvalidStateException
+	 * @throws \Nette\InvalidStateException
 	 */
 	public function getFilter($need = TRUE)
 	{
 		if ($need == TRUE) {
-			throw new Nette\InvalidStateException("DataGrid\Columns\ActionColumn cannot has filter.");
+			throw new \Nette\InvalidStateException('DataGrid\Columns\ActionColumn cannot has filter.');
 		}
 		return NULL;
 	}
@@ -61,7 +62,7 @@ implements \ArrayAccess
 	 * Action factory.
 	 * @param string $title textual title
 	 * @param string $signal textual link destination
-	 * @param Html $icon element which is added to a generated link
+	 * @param \Nette\Utils\Html $icon element which is added to a generated link
 	 * @param bool $useAjax use ajax? (add class self::$ajaxClass into generated link)
 	 * @param bool $type generate link with argument? (variable $keyName must be defined in data grid)
 	 * @return DataGrid\Action
@@ -86,7 +87,7 @@ implements \ArrayAccess
 	 * Returns column's action specified by name.
 	 * @param string $name action's name
 	 * @param bool $need throw exception if component doesn't exist?
-	 * @return Nette\ComponentModel\IComponent|NULL
+	 * @return ComponentModel\IComponent|NULL
 	 * @todo return type
 	 */
 	public function getAction($name = NULL, $need = TRUE)
@@ -113,34 +114,34 @@ implements \ArrayAccess
 	 * @param mixed $value
 	 * @param \DibiRow|array $data
 	 * @return string
-	 * @throws Nette\InvalidStateException
+	 * @throws \Nette\InvalidStateException
 	 */
 	public function formatContent($value, $data = NULL)
 	{
-		throw new Nette\InvalidStateException("DataGrid\Columns\ActionColumn cannot be formated.");
+		throw new \Nette\InvalidStateException('DataGrid\Columns\ActionColumn cannot be formated.');
 	}
 
 	/**
 	 * Filters data source.
 	 * @param mixed $value
-	 * @throws Nette\InvalidStateException
+	 * @throws \Nette\InvalidStateException
 	 */
 	public function applyFilter($value)
 	{
-		throw new Nette\InvalidStateException("DataGrid\Columns\ActionColumn cannot be filtered.");
+		throw new \Nette\InvalidStateException('DataGrid\Columns\ActionColumn cannot be filtered.');
 	}
 
 	/********************* interface \ArrayAccess *********************/
 	/**
 	 * Adds the component to the container.
 	 * @param string $name component name
-	 * @param Nette\ComponentModel\IComponent $component
-	 * @throws \InvalidArgumentException
+	 * @param ComponentModel\IComponent $component
+	 * @throws \Nette\InvalidArgumentException
 	 */
 	final public function offsetSet($name, $component)
 	{
-		if (!$component instanceof Nette\ComponentModel\IComponent) {
-			throw new \InvalidArgumentException("DataGrid\Columns\ActionColumn accepts only Nette\IComponent objects.");
+		if (!$component instanceof ComponentModel\IComponent) {
+			throw new \Nette\InvalidArgumentException('DataGrid\Columns\ActionColumn accepts only Nette\ComponentModel\IComponent objects.');
 		}
 		$this->getComponent('actions')->addComponent($component, $name == NULL ? count($this->getActions()) : $name);
 	}
@@ -148,7 +149,7 @@ implements \ArrayAccess
 	/**
 	 * Returns component specified by name. Throws exception if component doesn't exist.
 	 * @param string $name component name
-	 * @return Nette\ComponentModel\IComponent
+	 * @return ComponentModel\IComponent
 	 */
 	final public function offsetGet($name)
 	{

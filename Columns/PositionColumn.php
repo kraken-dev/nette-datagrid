@@ -1,7 +1,8 @@
 <?php
 
 namespace DataGrid\Columns;
-use DataGrid, Nette\Utils\Html, DataGrid\DataSources\IDataSource;
+use Nette\Utils\Html,
+	DataGrid\DataSources\IDataSource;
 
 /**
  * Representation of positioning data grid column, that provides moving entries up or down.
@@ -12,7 +13,8 @@ use DataGrid, Nette\Utils\Html, DataGrid\DataSources\IDataSource;
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-class PositionColumn extends NumericColumn
+class PositionColumn
+extends NumericColumn
 {
 	/** @var array */
 	public $moves = array();
@@ -32,11 +34,10 @@ class PositionColumn extends NumericColumn
 
 	/**
 	 * Checkbox column constructor.
-	 * @param  string  column's textual caption
-	 * @param  string  destination or signal to handler which do the move rutine
-	 * @param  array   textual labels for generated links
-	 * @param  bool    use ajax? (add class self::$ajaxClass into generated link)
-	 * @return void
+	 * @param string $caption column's textual caption
+	 * @param string $destination destination or signal to handler which do the move rutine
+	 * @param array $moves textual labels for generated links
+	 * @param bool $useAjax use ajax? (add class self::$ajaxClass into generated link)
 	 */
 	public function __construct($caption = NULL, $destination = NULL, array $moves = NULL, $useAjax = TRUE)
 	{
@@ -61,34 +62,33 @@ class PositionColumn extends NumericColumn
 		$this->monitor('Datagrid\DataGrid');
 	}
 
-
 	/**
 	 * This method will be called when the component (or component's parent)
 	 * becomes attached to a monitored object. Do not call this method yourself.
-	 * @param  Nette\IComponent
-	 * @return void
+	 * @param \Nette\ComponentModel\IComponent $dataGrid
 	 */
 	protected function attached($dataGrid)
 	{
-		if ($dataGrid instanceof DataGrid\DataGrid) {
+		if ($dataGrid instanceof \DataGrid\DataGrid) {
 			$dataSource = clone $dataGrid->dataSource;
 			$this->min = $this->max = 0;
 			$first = $dataSource->sort($this->getName(), IDataSource::ASCENDING)->reduce(1)->fetch();
-			if (count($first) > 0)
+			if (count($first) > 0) {
 				$this->min = (int) $first[0][$this->getName()];
+			}
 			$last = $dataSource->sort($this->getName(), IDataSource::DESCENDING)->reduce(1)->fetch();
-			if (count($last) > 0)
+			if (count($last) > 0) {
 				$this->max = (int) $first[0][$this->getName()];
+			}
 		}
 
 		parent::attached($dataGrid);
 	}
 
-
 	/**
 	 * Formats cell's content.
-	 * @param  mixed
-	 * @param  \DibiRow|array
+	 * @param mixed $value
+	 * @param \DibiRow|array $data
 	 * @return string
 	 */
 	public function formatContent($value, $data = NULL)

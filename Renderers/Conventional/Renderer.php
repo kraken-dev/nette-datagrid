@@ -1,10 +1,8 @@
 <?php
 
 namespace DataGrid\Renderers;
-use Nette, DataGrid,
-	Nette\Utils\Html,
-	DataGrid\Columns,
-	DataGrid\Action;
+
+use Nette\Utils\Html;
 
 /**
  * Converts a data grid into the HTML output.
@@ -15,23 +13,22 @@ use Nette, DataGrid,
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-class Conventional extends Nette\Object implements IRenderer
+class Conventional
+extends Nette\Object
+implements IRenderer
 {
 	/** @var array  of HTML tags */
 	public $wrappers = array(
 		'datagrid' => array(
 			'container' => 'table class=datagrid',
 		),
-
 		'form' => array(
 			'.class' => 'datagrid',
 		),
-
 		'error' => array(
 			'container' => 'ul class=error',
 			'item' => 'li',
 		),
-
 		'row.header' => array(
 			'container' => 'tr class=header',
 			'cell' => array(
@@ -39,7 +36,6 @@ class Conventional extends Nette\Object implements IRenderer
 				'.active' => 'active',
 			),
 		),
-
 		'row.filter' => array(
 			'container' => 'tr class=filters',
 			'cell' => array(
@@ -51,7 +47,6 @@ class Conventional extends Nette\Object implements IRenderer
 				'.submit' => 'button',
 			),
 		),
-
 		'row.content' => array(
 			'container' => 'tr', // .even, .selected
 			'.even' => 'even',
@@ -59,14 +54,12 @@ class Conventional extends Nette\Object implements IRenderer
 				'container' => 'td', // .checker, .action
 			),
 		),
-
 		'row.footer' => array(
 			'container' => 'tr class=footer',
 			'cell' => array(
 				'container' => 'td',
 			),
 		),
-
 		'paginator' => array(
 			'container' => 'span class=paginator',
 			'button' => array(
@@ -79,11 +72,9 @@ class Conventional extends Nette\Object implements IRenderer
 				'container' => 'span class=paginator-controls',
 			),
 		),
-
 		'operations' => array(
 			'container' => 'span class=operations',
 		),
-
 		'info' => array(
 			'container' => 'span class=grid-info',
 		),
@@ -98,40 +89,38 @@ class Conventional extends Nette\Object implements IRenderer
 	/** @var string */
 	public $infoFormat = 'Items %from% - %to% of %count% | Display: %selectbox% | %reset%';
 
-	/** @var string  template file*/
+	/** @var string template file*/
 	public $file;
 
 	/** @var DataGrid\DataGrid */
 	protected $dataGrid;
 
-	/** @var array  of function(Nette\Utils\Html $row, DibiRow $data) */
+	/** @var array of function(Nette\Utils\Html $row, DibiRow $data) */
 	public $onRowRender;
 
-	/** @var array  of function(Nette\Utils\Html $cell, string $column, mixed $value) */
+	/** @var array of function(Nette\Utils\Html $cell, string $column, mixed $value) */
 	public $onCellRender;
 
-	/** @var array  of function(Nette\Utils\Html $action, DibiRow $data) */
+	/** @var array of function(Nette\Utils\Html $action, DibiRow $data) */
 	public $onActionRender;
-        
-        private $columnRenderers = array();
 
+	private $columnRenderers = array();
 
 
 	/**
 	 * Data grid renderer constructor.
-	 * @return void
 	 */
 	public function __construct()
 	{
 		$this->file = __DIR__ . '/grid.latte';
 	}
 
-
 	/**
 	 * Provides complete datagrid rendering.
-	 * @param  DataGrid\DataGrid
-	 * @param  string
+	 * @param DataGrid\DataGrid $dataGrid
+	 * @param string $mode
 	 * @return string
+	 * @throws Nette\InvalidStateException
 	 */
 	public function render(DataGrid\DataGrid $dataGrid, $mode = NULL)
 	{
@@ -152,7 +141,6 @@ class Conventional extends Nette\Object implements IRenderer
 		return $template->__toString(TRUE);
 	}
 
-
 	/**
 	 * Renders datagrid form begin.
 	 * @return string
@@ -167,7 +155,6 @@ class Conventional extends Nette\Object implements IRenderer
 		return $form->getElementPrototype()->startTag();
 	}
 
-
 	/**
 	 * Renders datagrid form end.
 	 * @return string
@@ -177,7 +164,6 @@ class Conventional extends Nette\Object implements IRenderer
 		$form = $this->dataGrid->getForm(TRUE);
 		return $form->getElementPrototype()->endTag() . "\n";
 	}
-
 
 	/**
 	 * Renders validation errors.
@@ -204,7 +190,6 @@ class Conventional extends Nette\Object implements IRenderer
 			return "\n" . $ul->render(0);
 		}
 	}
-
 
 	/**
 	 * Renders data grid body.
@@ -261,7 +246,6 @@ class Conventional extends Nette\Object implements IRenderer
 		return $container->render(0);
 	}
 
-
 	/**
 	 * Renders data grid paginator.
 	 * @return string
@@ -269,13 +253,15 @@ class Conventional extends Nette\Object implements IRenderer
 	public function renderPaginator()
 	{
 		$paginator = $this->dataGrid->paginator;
-		if ($paginator->pageCount <= 1) return '';
+		if ($paginator->pageCount <= 1) {
+			return '';
+		}
 
 		$container = $this->getWrapper('paginator container');
 		$translator = $this->dataGrid->getTranslator();
 
 		$a = Html::el('a');
-		$a->addClass(Action::$ajaxClass);
+		$a->addClass(\DataGrid\Action::$ajaxClass);
 
 		// to-first button
 		$first = $this->getWrapper('paginator button first');
@@ -350,14 +336,15 @@ class Conventional extends Nette\Object implements IRenderer
 		return $container->render();
 	}
 
-
 	/**
 	 * Renders data grid operation controls.
 	 * @return string
 	 */
 	public function renderOperations()
 	{
-		if (!$this->dataGrid->hasOperations()) return '';
+		if (!$this->dataGrid->hasOperations()) {
+			return '';
+		}
 
 		$container = $this->getWrapper('operations container');
 		$form = $this->dataGrid->getForm(TRUE);
@@ -367,7 +354,6 @@ class Conventional extends Nette\Object implements IRenderer
 
 		return $container->render();
 	}
-
 
 	/**
 	 * Renders info about data grid.
@@ -405,10 +391,9 @@ class Conventional extends Nette\Object implements IRenderer
 		return $container->render();
 	}
 
-
 	/**
 	 * Generates datagrid headrer.
-	 * @return Nette\Utils\Html
+	 * @return Html
 	 */
 	protected function generateHeaderRow()
 	{
@@ -427,8 +412,8 @@ class Conventional extends Nette\Object implements IRenderer
 
 		// headers
 		foreach ($this->dataGrid->getColumns() as $column) {
-                        $renderer = $this->getColumnRenderer($column->getRenderer());
-                        $cell = $renderer->generateHeaderCell($column);
+			$renderer = $this->getColumnRenderer($column->getRenderer());
+			$cell = $renderer->generateHeaderCell($column);
 
 			$row->add($cell);
 		}
@@ -436,34 +421,36 @@ class Conventional extends Nette\Object implements IRenderer
 		return $row;
 	}
 
-        public function getSubmitControl() {
-                $form = $this->dataGrid->getForm(TRUE);
+	/**
+	 * @return Nette\Forms\Controls\SubmitButton
+	 */
+	public function getSubmitControl()
+	{
+		$form = $this->dataGrid->getForm(TRUE);
 
 		$submitControl = $form['filterSubmit']->control;
 		$submitControl->addClass($this->getValue('row.filter control .submit'));
 		$submitControl->title = $submitControl->value;
-                
-                return $submitControl;
-        }
 
+		return $submitControl;
+	}
 
 	/**
 	 * Generates datagrid filter.
-	 * @return Nette\Utils\Html
+	 * @return Html
 	 */
 	protected function generateFilterRow()
 	{
 		$row = $this->getWrapper('row.filter container');
-		
 
 		foreach ($this->dataGrid->getColumns() as $column) {
 			$renderer = $this->getColumnRenderer($column->getRenderer());
-                        $cell = $renderer->generateFilterCell($column);
+			$cell = $renderer->generateFilterCell($column);
 			$row->add($cell);
 		}
 
 		if (!$this->dataGrid->hasActions()) {
-                        $submitControl = $this->getSubmitControl();
+			$submitControl = $this->getSubmitControl();
 			$submitControl->addStyle('display: none');
 			$row->add($submitControl);
 		}
@@ -471,11 +458,11 @@ class Conventional extends Nette\Object implements IRenderer
 		return $row;
 	}
 
-
 	/**
 	 * Generates datagrid row content.
-	 * @param  \Traversable|array data
-	 * @return Nette\Utils\Html
+	 * @param \Traversable|array $data
+	 * @return Html
+	 * @throws \InvalidArgumentException
 	 */
 	protected function generateContentRow($data)
 	{
@@ -501,18 +488,17 @@ class Conventional extends Nette\Object implements IRenderer
 		foreach ($this->dataGrid->getColumns() as $column) {
 			$renderer = $this->getColumnRenderer($column->getRenderer());
 			$cell = $renderer->generateContentCell($column, $data, $primary);
-			$this->onCellRender($cell, $column->getName(), !($column instanceof Columns\ActionColumn) ? $data[$column->getName()] : $data);
+			$this->onCellRender($cell, $column->getName(), !($column instanceof \DataGrid\Columns\ActionColumn) ? $data[$column->getName()] : $data);
 			$row->add($cell);
 		}
-		unset($form, $primary, $cell, $value, $action);
+		unset($form, $primary, $cell, $value);
 		$this->onRowRender($row, $data);
 		return $row;
 	}
 
-
 	/**
 	 * Generates datagrid footer.
-	 * @return Nette\Utils\Html
+	 * @return Html
 	 */
 	protected function generateFooterRow()
 	{
@@ -545,22 +531,26 @@ class Conventional extends Nette\Object implements IRenderer
 
 		return $row;
 	}
-        
+
 	/**
 	 * Return the column renderer according to the id
 	 * and cache it, so the next call with the same id will
 	 * return the same object
 	 * If istance of IColumnRenderer is given instead of the id,
 	 * simply pass it through
-	 * @param type $id
+	 * @param Column\IColumnRenderer|string $id
 	 * @return type
+	 * @throws Nette\InvalidArgumentException
 	 */
-	protected function getColumnRenderer($id) {
-		if ($id instanceof Column\IColumnRenderer)
+	protected function getColumnRenderer($id)
+	{
+		if ($id instanceof Column\IColumnRenderer) {
 			return $id;
+		}
 
-		if (!is_string($id))
-			throw new \Nette\InvalidArgumentException("Renderer id must be a string");
+		if (!is_string($id)) {
+			throw new Nette\InvalidArgumentException("Renderer id must be a string");
+		}
 
 		// in columnRenderers array may be strings as well as renderer instances
 		if (!isset($this->columnRenderers[$id])) {
@@ -578,30 +568,36 @@ class Conventional extends Nette\Object implements IRenderer
 		return $this->columnRenderers[$id];
 	}
 
+	/**
+	 * @param string $id
+	 * @param string|DatagRid\Renderers\Column\IColumnRenderer $renderer
+	 * @return Renderer (fluent)
+	 * @throws Nette\InvalidArgumentException
+	 */
 	public function setColumnRenderer($id, $renderer) {
-		if (!is_string($renderer) && !($renderer instanceof \DataGrid\Renderers\Column\IColumnRenderer))
-			throw new \Nette\InvalidArgumentException("Renderer can only be string renderer classname or renderer object itself.");
+		if (!is_string($renderer) && !($renderer instanceof \DataGrid\Renderers\Column\IColumnRenderer)) {
+			throw new Nette\InvalidArgumentException("Renderer can only be string renderer classname or renderer object itself.");
+		}
 		$this->columnRenderers[$id] = $renderer;
 		return $this;
 	}
-	
+
 	/**
-	 * @param  string
-	 * @return Nette\Utils\Html
+	 * @param string $name
+	 * @return Html
 	 */
-        // TODO: move to column renderer?
+	// TODO: move to column renderer?
 	public function getWrapper($name)
 	{
 		$data = $this->getValue($name);
 		return $data instanceof Html ? clone $data : Html::el($data);
 	}
 
-
 	/**
-	 * @param  string
+	 * @param string $name
 	 * @return string
 	 */
-        // TODO: move to column renderer?
+	// TODO: move to column renderer?
 	public function getValue($name)
 	{
 		$name = explode(' ', $name);
@@ -613,9 +609,7 @@ class Conventional extends Nette\Object implements IRenderer
 		return $data;
 	}
 
-
 	/**
-	 * Returns DataGrid.
 	 * @return DataGrid\DataGrid
 	 */
 	public function getDataGrid()

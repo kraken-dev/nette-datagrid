@@ -12,8 +12,6 @@
  */
 
 namespace DataGrid;
-use Nette;
-
 
 /**
  * A data bound list control that displays the items from data source in a table.
@@ -25,7 +23,9 @@ use Nette;
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
+class DataGrid
+extends \Nette\Application\UI\Control
+implements \ArrayAccess
 {
 	/** @persistent int */
 	public $page = 1;
@@ -42,10 +42,10 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 	/** @var array */
 	public $displayedItems = array('all', 5, 10, 15, 20, 50, 100);
 
-	/** @var bool  multi column order */
+	/** @var bool multi column order */
 	public $multiOrder = TRUE;
 
-	/** @var bool  disables ordering for all columns */
+	/** @var bool disables ordering for all columns */
 	public $disableOrder = FALSE;
 
 	/** @var string */
@@ -57,19 +57,19 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 	/** @var array */
 	public $operations = array();
 
-	/** @var array  of valid callback(s) */
+	/** @var array of valid callback(s) */
 	protected $onOperationSubmit;
 
-	/** @var bool  can datagrid save his state into session? */
+	/** @var bool can datagrid save his state into session? */
 	public $rememberState = FALSE;
 
-	/** @var int|string  session timeout (default: until is browser closed) */
+	/** @var int|string session timeout (default: until is browser closed) */
 	public $timeout = 0;
 
-	/** @var DataGrid\Renderers\IRenderer */
+	/** @var Renderers\IRenderer */
 	protected $renderer;
 
-	/** @var DataGrid\DataSources\IDataSource */
+	/** @var DataSources\IDataSource */
 	protected $dataSource;
 
 	/** @var Nette\Utils\Paginator */
@@ -81,10 +81,10 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 	/** @var string */
 	protected $receivedSignal;
 
-	/** @var DataGrid\Columns\ActionColumn */
+	/** @var Columns\ActionColumn */
 	protected $currentActionColumn;
 
-	/** @var bool  was method render() called? */
+	/** @var bool was method render() called? */
 	protected $wasRendered = FALSE;
 
 	/** @var Nette\Localization\ITranslator */
@@ -93,7 +93,6 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 
 	/**
 	 * Data grid constructor.
-	 * @return void
 	 */
 	public function __construct()
 	{
@@ -106,22 +105,20 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		}
 	}
 
-
 	/**
 	 * Getter / property method.
-	 * @return DataGrid\DataSources\IDataSource
+	 * @return DataSources\IDataSource
 	 */
 	public function getDataSource()
 	{
 		return $this->dataSource;
 	}
 
-
 	/**
 	 * Setter / property method.
 	 * Binds data source to data grid.
-	 * @param  DataGrid\DataSources\IDataSource
-	 * @return DataGrid\DataGrid
+	 * @param DataSources\IDataSource $dataSource
+	 * @return DataGrid (fluent)
 	 */
 	public function setDataSource(DataSources\IDataSource $dataSource)
 	{
@@ -129,15 +126,11 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $this;
 	}
 
-
-
 	/********************* public getters and setters *********************/
-
-
-
 	/**
 	 * Getter / property method.
 	 * Generates list of pages used for visual control. Use for your custom paginator rendering.
+	 * @param int $count
 	 * @return array
 	 */
 	public function getSteps($count = 15)
@@ -153,21 +146,18 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return array_values(array_unique($arr));
 	}
 
-
 	/**
 	 * Getter / property method.
-	 * @return Nette\Paginator
+	 * @return Nette\Utils\Paginator
 	 */
 	public function getPaginator()
 	{
 		return $this->paginator;
 	}
 
-
 	/**
 	 * Setter / property method.
-	 * @param  mixed  callback(s) to handler(s) which is called after data grid form operation is submited.
-	 * @return void
+	 * @param mixed $callback callback(s) to handler(s) which is called after data grid form operation is submited.
 	 */
 	public function setOnOperationSubmit($callback)
 	{
@@ -176,7 +166,6 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		}
 		$this->onOperationSubmit[] = $callback;
 	}
-
 
 	/**
 	 * Getter / property method.
@@ -187,32 +176,25 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $this->onOperationSubmit;
 	}
 
-
-
 	/********************* Iterators getters *********************/
-
-
-
 	/**
 	 * Iterates over datagrid rows.
 	 * 
-	 * @throws Nette\InvalidStateException
+	 * @throws \Nette\InvalidStateException
 	 * @return \Iterator
 	 */
 	public function getRows()
 	{
 		if (! $this->dataSource instanceof DataSources\IDataSource) {
-				throw new Nette\InvalidStateException('Data source is not instance of IDataSource. ' . \gettype($this->dataSource) . ' given.');
+				throw new \Nette\InvalidStateException('Data source is not instance of IDataSource. ' . \gettype($this->dataSource) . ' given.');
 		}
 		return $this->dataSource->getIterator();
 	}
-
 
 	/**
 	 * Iterates over datagrid columns.
 	 * 
 	 * @param string $type
-	 * @throws \InvalidArgumentException
 	 * @return \ArrayIterator
 	 */
 	public function getColumns($type = 'DataGrid\Columns\IColumn')
@@ -224,11 +206,9 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $columns->getIterator();
 	}
 
-
 	/**
 	 * Iterates over datagrid filters.
-	 * @param  string
-	 * @throws \InvalidArgumentException
+	 * @param string $type
 	 * @return \ArrayIterator
 	 */
 	public function getFilters($type = 'DataGrid\Filters\IColumnFilter')
@@ -245,12 +225,10 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $filters->getIterator();
 	}
 
-
 	/**
 	 * TODO: throw new DeprecatedException
 	 * Iterates over all datagrid actions.
-	 * @param  string
-	 * @throws \InvalidArgumentException
+	 * @param string $type
 	 * @return \ArrayIterator
 	 */
 	public function getActions($type = 'DataGrid\IAction')
@@ -268,12 +246,7 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $actions->getIterator();
 	}
 
-
-
 	/********************* general data grid behavior *********************/
-
-
-
 	/**
 	 * Does data grid has any row?
 	 * @return bool
@@ -283,10 +256,9 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return count($this->getRows()) > 0;
 	}
 
-
 	/**
 	 * Does data grid has any column?
-	 * @param  string
+	 * @param string $type
 	 * @return bool
 	 */
 	public function hasColumns($type = NULL)
@@ -294,10 +266,9 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return count($type == NULL ? $this->getColumns() : $this->getColumns($type)) > 0;
 	}
 
-
 	/**
 	 * Does any of datagrid columns has a filter?
-	 * @param  string
+	 * @param string $type
 	 * @return bool
 	 */
 	public function hasFilters($type = NULL)
@@ -305,17 +276,15 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return count($type == NULL ? $this->getFilters() : $this->getFilters($type)) > 0;
 	}
 
-
 	/**
 	 * Does datagrid has any action?
-	 * @param  string
+	 * @param string $type
 	 * @return bool
 	 */
 	public function hasActions($type = NULL)
 	{
 		return count($type == NULL ? $this->getActions() : $this->getActions($type)) > 0;
 	}
-
 
 	/**
 	 * Does datagrid has any operation?
@@ -326,16 +295,10 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return count($this->operations) > 0;
 	}
 
-
-
 	/********************* component's state *********************/
-
-
-
 	/**
 	 * Loads params
-	 * @param  array
-	 * @return void
+	 * @param array $params
 	 */
 	public function loadState(array $params)
 	{
@@ -368,11 +331,9 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		parent::loadState($params);
 	}
 
-
 	/**
 	 * Save params
-	 * @param  array
-	 * @return void
+	 * @param array $params
 	 */
 	public function saveState(array & $params)
 	{
@@ -397,11 +358,8 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		}
 	}
 
-
 	/**
 	 * Restores component's state.
-	 * @param  string
-	 * @return void
 	 */
 	public function restoreState()
 	{
@@ -419,16 +377,9 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		$session->remove();
 	}
 
-
-
-
 	/********************* signal handlers ********************/
-
-
 	/**
 	 * Do the final work after signal handling
-	 *
-	 * @return void
 	 */
 	protected function finalize()
 	{
@@ -450,18 +401,14 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 			$presenter->payload->snippets[$snippet] = $html;
 			$presenter->sendPayload();
 			$presenter->terminate();
-
 		} else {
-			
 			$presenter->redirect('this');
 		}
 	}
 
-
 	/**
 	 * Changes page number.
-	 * @param  int
-	 * @return void
+	 * @param int $goto
 	 */
 	public function handlePage($goto)
 	{
@@ -470,12 +417,10 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		$this->finalize();
 	}
 
-
 	/**
 	 * Changes column sorting order.
-	 * @param  string
-	 * @param  string
-	 * @return void
+	 * @param string $by
+	 * @param string $dir
 	 */
 	public function handleOrder($by, $dir)
 	{
@@ -492,15 +437,12 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 			if (!isset($list[$by])) {
 				if (!$this->multiOrder) $list = array();
 				$list[$by] = 'a';
-
 			} elseif ($list[$by] === 'd') {
 				if ($this->multiOrder) unset($list[$by]);
 				else $list[$by] = 'a';
-
 			} else {
 				$list[$by] = 'd';
 			}
-
 		} else {
 			if (!$this->multiOrder) $list = array();
 			$list[$by] = $dir;
@@ -511,11 +453,9 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		$this->finalize();
 	}
 
-
 	/**
 	 * Prepare filtering.
-	 * @param  string
-	 * @return void
+	 * @param string $by
 	 */
 	public function handleFilter($by)
 	{
@@ -528,27 +468,23 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		$this->finalize();
 	}
 
-
 	/**
 	 * Change number of displayed items.
-	 * @param  string
-	 * @return void
+	 * @param string $value
+	 * @throws \Nette\InvalidArgumentException
 	 */
 	public function handleItems($value)
 	{
 		if ($value < 0) {
-			throw new \InvalidArgumentException("Parametr must be non-negative number, '$value' given.");
+			throw new \Nette\InvalidArgumentException("Parametr must be non-negative number, '$value' given.");
 		}
 		$this->itemsPerPage = $value;
 
 		$this->finalize();
 	}
 
-
 	/**
 	 * Change component's state.
-	 * @param  string
-	 * @return void
 	 */
 	public function handleReset()
 	{
@@ -557,16 +493,11 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		$this->finalize();
 	}
 
-
-
 	/********************* submit handlers *********************/
-
-
-
 	/**
 	 * Data grid form submit handler.
-	 * @param  Nette\Application\UI\Form
-	 * @return void
+	 * @param Nette\Application\UI\Form $form
+	 * @throws \Nette\InvalidStateException
 	 */
 	public function formSubmitHandler(Nette\Application\UI\Form $form)
 	{
@@ -578,38 +509,27 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 
 			if ($form['filterSubmit']->isSubmittedBy()) {
 				$this->handleFilter($values['filters']);
-
 			} elseif ($form['pageSubmit']->isSubmittedBy()) {
 				$this->handlePage($values['page']);
-
 			} elseif ($form['itemsSubmit']->isSubmittedBy()) {
 				$this->handleItems($values['items']);
-
 			} elseif ($form['resetSubmit']->isSubmittedBy()) {
 				$this->handleReset();
-
 			} elseif ($form['operationSubmit']->isSubmittedBy()) {
 				if (!is_array($this->onOperationSubmit)) {
-					throw new Nette\InvalidStateException('No user defined handler for operations; assign valid callback to operations handler into DataGrid\DataGrid::$operationsHandler variable.');
+					throw new \Nette\InvalidStateException('No user defined handler for operations; assign valid callback to operations handler into DataGrid\DataGrid::$operationsHandler variable.');
 				}
-
 			} else {
-				throw new Nette\InvalidStateException('Unknown submit button.');
+				throw new \Nette\InvalidStateException('Unknown submit button.');
 			}
-
 		}
 
 		$this->finalize();
 	}
 
-
-
 	/********************* applycators (call before rendering only) *********************/
-
-
 	/**
 	 * Aplycators caller - filters data grid items.
-	 * @return void
 	 */
 	protected function filterItems()
 	{
@@ -622,10 +542,8 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		$this->applyPaging();
 	}
 
-
 	/**
 	 * Applies default sorting on data grid.
-	 * @return void
 	 */
 	protected function applyDefaultSorting()
 	{
@@ -637,7 +555,6 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 
 	/**
 	 * Applies default filtering on data grid.
-	 * @return void
 	 */
 	protected function applyDefaultFiltering()
 	{
@@ -646,10 +563,8 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		}
 	}
 
-
 	/**
 	 * Applies paging on data grid.
-	 * @return void
 	 */
 	protected function applyPaging()
 	{
@@ -666,10 +581,8 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		$this->dataSource->reduce($this->paginator->length, $this->paginator->offset);
 	}
 
-
 	/**
 	 * Applies sorting on data grid.
-	 * @return void
 	 */
 	protected function applySorting()
 	{
@@ -682,10 +595,8 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $list;
 	}
 
-
 	/**
 	 * Applies filtering on data grid.
-	 * @return void
 	 */
 	protected function applyFiltering()
 	{
@@ -699,10 +610,8 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		}
 	}
 
-
 	/**
 	 * Applies filtering on data grid.
-	 * @return void
 	 */
 	protected function applyItems()
 	{
@@ -715,26 +624,19 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		}
 	}
 
-
-
 	/********************* renderers *********************/
-
-
-
 	/**
 	 * Sets data grid renderer.
-	 * @param  DataGrid\Renderers\IRenderer
-	 * @return void
+	 * @param Renderers\IRenderer $renderer
 	 */
 	public function setRenderer(Renderers\IRenderer $renderer)
 	{
 		$this->renderer = $renderer;
 	}
 
-
 	/**
 	 * Returns data grid renderer.
-	 * @return DataGrid\Renderers\IRenderer
+	 * @return Renderers\IRenderer
 	 */
 	public function getRenderer()
 	{
@@ -744,10 +646,9 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $this->renderer;
 	}
 
-
 	/**
 	 * Renders data grid.
-	 * @return void
+	 * @throws \Nette\InvalidStateException
 	 */
 	public function render()
 	{
@@ -766,7 +667,7 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 
 			if ($this->hasActions() || $this->hasOperations()) {
 				if ($this->keyName == NULL) {
-					throw new Nette\InvalidStateException("Name of key for operations or actions was not set for DataGrid '" . $this->getName() . "'.");
+					throw new \Nette\InvalidStateException("Name of key for operations or actions was not set for DataGrid '" . $this->getName() . "'.");
 				}
 			}
 
@@ -786,7 +687,6 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		echo mb_convert_encoding($s, 'HTML-ENTITIES', 'UTF-8');
 	}
 
-
 	/**
 	 * Template factory.
 	 * @return Nette\Templating\ITemplate
@@ -800,12 +700,7 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $template;
 	}
 
-
-
 	/********************* components handling *********************/
-
-
-
 	/**
 	 * Component factory.
 	 * @see Nette/ComponentContainer#createComponent()
@@ -877,10 +772,9 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return;
 	}
 
-
 	/**
 	 * Returns data grid's form component.
-	 * @param  bool   throw exception if form doesn't exist?
+	 * @param bool $need throw exception if form doesn't exist?
 	 * @return Nette\Application\UI\Form
 	 */
 	public function getForm($need = TRUE)
@@ -888,11 +782,8 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $this->getComponent('form', $need);
 	}
 
-
 	/**
 	 * Generates filter controls and checker's checkbox controls
-	 * @param  Nette\Application\UI\Form
-	 * @return void
 	 */
 	protected function regenerateFormControls()
 	{
@@ -933,13 +824,11 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		$form['items']->setValue($this->paginator->itemsPerPage);
 	}
 
-
 	/**
 	 * Allows operations and adds checker (column filled by checkboxes).
-	 * @param  array  list of operations (selectbox items)
-	 * @param  mixed  valid callback handler which provides rutines from $operations
-	 * @param  string column name used to identifies each item/record in data grid (name of primary key of table/query from data source is recomended)
-	 * @return void
+	 * @param array $operations list of operations (selectbox items)
+	 * @param mixed $callback valid callback handler which provides rutines from $operations
+	 * @param string $key column name used to identifies each item/record in data grid (name of primary key of table/query from data source is recomended)
 	 */
 	public function allowOperations(array $operations, $callback = NULL, $key = NULL)
 	{
@@ -953,11 +842,8 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		}
 	}
 
-
 	/**
 	 * Generate columns from data source
-	 *
-	 * @return void
 	 */
 	protected function generateColumns()
 	{
@@ -966,16 +852,13 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		}
 	}
 
-
 	/******************** Column Factories ********************/
-	
-
 	/**
 	 * Adds column of textual values.
-	 * @param  string  control name
-	 * @param  string  column label
-	 * @param  int     maximum number of dislayed characters
-	 * @return DataGrid\Columns\TextColumn
+	 * @param string $name control name
+	 * @param string $caption column label
+	 * @param int $maxLength maximum number of dislayed characters
+	 * @return Columns\TextColumn
 	 */
 	public function addColumn($name, $caption = NULL, $maxLength = NULL)
 	{
@@ -985,75 +868,70 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 
 	/**
 	 * Adds column of numeric values.
-	 * @param  string  control name
-	 * @param  string  column label
-	 * @param  int     number of digits after the decimal point
-	 * @return DataGrid\Columns\NumericColumn
+	 * @param string $name control name
+	 * @param string $caption column label
+	 * @param int $maxLength number of digits after the decimal point
+	 * @return Columns\NumericColumn
 	 */
 	public function addNumericColumn($name, $caption = NULL, $precision = 2)
 	{
 		return $this[$name] = new Columns\NumericColumn($caption, $precision);
 	}
 
-
 	/**
 	 * Adds column of date-represented values.
-	 * @param  string  control name
-	 * @param  string  column label
-	 * @param  string  date format
-	 * @return DataGrid\Columns\DateColumn
+	 * @param string $name control name
+	 * @param string $caption column label
+	 * @param string $format date format
+	 * @return Columns\DateColumn
 	 */
 	public function addDateColumn($name, $caption = NULL, $format = '%x')
 	{
 		return $this[$name] = new Columns\DateColumn($caption, $format);
 	}
 
-
 	/**
 	 * Adds column of boolean values (represented by checkboxes).
-	 * @param  string  control name
-	 * @param  string  column label
-	 * @return DataGrid\Columns\CheckboxColumn
+	 * @param string $name control name
+	 * @param string $caption column label
+	 * @return Columns\CheckboxColumn
 	 */
 	public function addCheckboxColumn($name, $caption = NULL)
 	{
 		return $this[$name] = new Columns\CheckboxColumn($caption);
 	}
 
-
 	/**
 	 * Adds column of graphical images.
-	 * @param  string  control name
-	 * @param  string  column label
-	 * @return DataGrid\Columns\ImageColumn
+	 * @param string $name control name
+	 * @param string $caption column label
+	 * @return Columns\ImageColumn
 	 */
 	public function addImageColumn($name, $caption = NULL)
 	{
 		return $this[$name] = new Columns\ImageColumn($caption);
 	}
 
-
 	/**
 	 * Adds column which provides moving entries up or down.
-	 * @param  string  control name
-	 * @param  string  column label
-	 * @param  string  destination or signal to handler which do the move rutine
-	 * @param  array   textual labels for generated links
-	 * @param  bool    use ajax? (add class DataGridColumn::$ajaxClass into generated link)
-	 * @return DataGrid\Columns\PositionColumn
+	 * @param string $name control name
+	 * @param string $caption column label
+	 * @param string $destination destination or signal to handler which do the move rutine
+	 * @param array $moves textual labels for generated links
+	 * @param bool $useAjax use ajax? (add class Columns\Column::$ajaxClass into generated link)
+	 * @return Columns\PositionColumn
 	 */
 	public function addPositionColumn($name, $caption = NULL, $destination = NULL, array $moves = NULL, $useAjax = TRUE)
 	{
 		return $this[$name] = new Columns\PositionColumn($caption, $destination, $moves);
 	}
 
-
 	/**
 	 * Adds column which represents logic container for data grid actions.
-	 * @param  string  control name
-	 * @param  string  column label
-	 * @param  bool
-	 * @return DataGrid\Columns\ActionColumn
+	 * @param string $name control name
+	 * @param string $caption column label
+	 * @param bool $setAsCurrent
+	 * @return Columns\ActionColumn
 	 */
 	public function addActionColumn($name, $caption = NULL, $setAsCurrent = TRUE)
 	{
@@ -1065,52 +943,43 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $this[$name] = $column;
 	}
 
-
 	/**
-	 * @param  DataGrid\Columns\ActionColumn
-	 * @return void
+	 * @param Columns\ActionColumn $column
 	 */
 	public function setCurrentActionColumn(Columns\ActionColumn $column)
 	{
 		$this->currentActionColumn = $column;
 	}
 
-
 	/**
 	 * Action factory.
-	 * @param  string  textual title
-	 * @param  string  textual link destination
-	 * @param  Html    element which is added to a generated link
-	 * @param  bool    use ajax? (add class self::$ajaxClass into generated link)
-	 * @param  mixed   generate link with argument? (if yes you can specify name of parameter
-	 * 				   otherwise variable DataGrid\DataGrid::$keyName will be used and must be defined)
-	 * @return DataGrid\Action
+	 * @param string $title textual title
+	 * @param string $signal textual link destination
+	 * @param Html $icon element which is added to a generated link
+	 * @param bool $useAjax use ajax? (add class self::$ajaxClass into generated link)
+	 * @param mixed $key generate link with argument? (if yes you can specify name of parameter
+	 * 				   otherwise variable DataGrid::$keyName will be used and must be defined)
+	 * @return Action
+	 * @throws \Nette\InvalidStateException
 	 */
 	public function addAction($title, $signal, $icon = NULL, $useAjax = FALSE, $key = Action::WITH_KEY)
 	{
 		if (!$this->hasColumns('DataGrid\Columns\ActionColumn')) {
-			throw new \InvalidStateException('No DataGrid\Columns\ActionColumn defined. Use DataGrid\DataGrid::addActionColumn before you add actions.');
+			throw new \Nette\InvalidStateException('No DataGrid\Columns\ActionColumn defined. Use DataGrid\DataGrid::addActionColumn before you add actions.');
 		}
 
 		return $this->currentActionColumn->addAction($title, $signal, $icon, $useAjax, $key);
 	}
 
-
-
 	/********************* translator ********************/
-
-
-
 	/**
 	 * Sets translate adapter.
-	 * @param  Nette\Localization\ITranslator
-	 * @return void
+	 * @param Nette\Localization\ITranslator $translator
 	 */
 	public function setTranslator(Nette\Localization\ITranslator $translator = NULL)
 	{
 		$this->translator = $translator;
 	}
-
 
 	/**
 	 * Returns translate adapter.
@@ -1121,10 +990,9 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $this->translator;
 	}
 
-
 	/**
 	 * Returns translated string.
-	 * @param  string
+	 * @param string $s
 	 * @return string
 	 */
 	public function translate($s)
@@ -1133,15 +1001,10 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $this->translator === NULL ? $s : call_user_func_array(array($this->getTranslator(), 'translate'), $args);
 	}
 
-
-
 	/********************* interface Nette\Application\ISignalReceiver *********************/
-
-
-
 	/**
 	 * Checks if component is signal receiver.
-	 * @param  string  signal name
+	 * @param string $signal signal name
 	 * @return bool
 	 */
 	public function isSignalReceiver($signal = TRUE)
@@ -1158,12 +1021,7 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		//return $this->getPresenter()->isSignalReceiver($signal == 'submit' ? $this->getForm() : $this, $signal);
 	}
 
-
-
 	/********************* backend *********************/
-
-
-
 	/**
 	 * @return Nette\Http\SessionSection
 	 */
@@ -1172,7 +1030,6 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 		return $this->getSession()->getNamespace('Nette.Extras.DataGrid/' . $this->getName() . '/states');
 	}
 
-
 	/**
 	 * @return Nette\Http\Session
 	 */
@@ -1180,7 +1037,6 @@ class DataGrid extends Nette\Application\UI\Control implements \ArrayAccess
 	{
 		return Nette\Environment::getSession();
 	}
-
 
 	/**
 	 * Renders table grid and return as string.

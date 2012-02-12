@@ -1,4 +1,5 @@
 <?php
+
 namespace DataGrid\DataSources\Dibi;
 
 use DataGrid\DataSources\IDataSource,
@@ -12,7 +13,8 @@ use DataGrid\DataSources\IDataSource,
  * @author Štěpán Svoboda
  * @author Petr Morávek
  */
-class DataSource extends DataSources\DataSource
+class DataSource
+extends DataSources\DataSource
 {
 	/**
 	 * @var \DibiDataSource Dibi data source instance
@@ -26,7 +28,7 @@ class DataSource extends DataSources\DataSource
 
 	/**
 	 * Store given dibi data source instance
-	 * @param \DibiDataSource
+	 * @param \DibiDataSource $ds
 	 * @return IDataSource
 	 */
 	public function __construct(\DibiDataSource $ds)
@@ -46,7 +48,8 @@ class DataSource extends DataSources\DataSource
 
 	/**
 	 * Does datasource have column of given name?
-	 * @return boolean
+	 * @param string $name
+	 * @return bool
 	 */
 	public function hasColumn($name)
 	{
@@ -55,7 +58,7 @@ class DataSource extends DataSources\DataSource
 
 	/**
 	 * Return distinct values for a selectbox filter
-	 * @param string Column name
+	 * @param string $column Column name
 	 * @return array
 	 */
 	public function getFilterItems($column)
@@ -66,18 +69,17 @@ class DataSource extends DataSources\DataSource
 
 	/**
 	 * Add filtering onto specified column
-	 * @param string column name
-	 * @param string filter
-	 * @param string|array operation mode
-	 * @param string chain type (if third argument is array)
-	 * @throws \InvalidArgumentException
-	 * @return IDataSource
+	 * @param string $column column name
+	 * @param string $operation filter
+	 * @param string|array $value operation mode
+	 * @param string $chainType chain type (if third argument is array)
+	 * @throws \Nette\InvalidArgumentException
 	 */
 	public function filter($column, $operation = IDataSource::EQUAL, $value = NULL, $chainType = NULL)
 	{
 		if (is_array($operation)) {
 			if ($chainType !== self::CHAIN_AND && $chainType !== self::CHAIN_OR) {
-				throw new \InvalidArgumentException('Invalid chain operation type.');
+				throw new \Nette\InvalidArgumentException('Invalid chain operation type.');
 			}
 			$conds = array();
 			foreach ($operation as $t) {
@@ -86,8 +88,9 @@ class DataSource extends DataSources\DataSource
 					$conds[] = array('%n', $column, $t);
 				} else {
 					$modifier = is_double($value) ? dibi::FLOAT : dibi::TEXT;
-					if ($operation === self::LIKE || $operation === self::NOT_LIKE)
+					if ($operation === self::LIKE || $operation === self::NOT_LIKE) {
 						$value = DataSources\Utils\WildcardHelper::formatLikeStatementWildcards($value);
+					}
 
 					$conds[] = array('%n', $column, $t, '%' . $modifier, $value);
 				}
@@ -107,8 +110,9 @@ class DataSource extends DataSources\DataSource
 				$this->ds->where('%n', $column, $operation);
 			} else {
 				$modifier = is_double($value) ? dibi::FLOAT : dibi::TEXT;
-				if ($operation === self::LIKE || $operation === self::NOT_LIKE)
+				if ($operation === self::LIKE || $operation === self::NOT_LIKE) {
 					$value = DataSources\Utils\WildcardHelper::formatLikeStatementWildcards($value);
+				}
 
 				$this->ds->where('%n', $column, $operation, '%' . $modifier, $value);
 			}
@@ -117,15 +121,15 @@ class DataSource extends DataSources\DataSource
 
 	/**
 	 * Adds ordering to specified column
-	 * @param string column name
-	 * @param string one of ordering types
-	 * @throws \InvalidArgumentException
+	 * @param string $column column name
+	 * @param string $order one of ordering types
+	 * @throws \Nette\InvalidArgumentException
 	 * @return IDataSource
 	 */
 	public function sort($column, $order = IDataSource::ASCENDING)
 	{
 		if (!$this->hasColumn($column)) {
-			throw new \InvalidArgumentException("Column '$column' not exist.");
+			throw new \Nette\InvalidArgumentException("Column '$column' not exist.");
 		}
 		$this->ds->orderBy($column, $order === self::ASCENDING ? 'ASC' : 'DESC');
 
@@ -134,19 +138,20 @@ class DataSource extends DataSources\DataSource
 
 	/**
 	 * Reduce the result starting from $start to have $count rows
-	 * @param int the number of results to obtain
-	 * @param int the offset
-	 * @throws \OutOfRangeException
+	 * @param int $count the number of results to obtain
+	 * @param int $start the offset
+	 * @throws \Nette\OutOfRangeException
 	 * @return IDataSource
 	 */
 	public function reduce($count, $start = 0)
 	{
 		if ($count != NULL && $count <= 0) { //intentionally !=
-			throw new \OutOfRangeException;
+			throw new \Nette\OutOfRangeException;
 		}
 
-		if ($start != NULL && ($start < 0 || $start > count($this)))
-			throw new \OutOfRangeException;
+		if ($start != NULL && ($start < 0 || $start > count($this))) {
+			throw new \Nette\OutOfRangeException;
+		}
 
 		$this->ds->applyLimit($count == NULL ? NULL : $count, $start == NULL ? NULL : $start);
 		return $this;
@@ -176,12 +181,11 @@ class DataSource extends DataSources\DataSource
 	 */
 	public function count()
 	{
-		return (int) $this->ds->count();
+		return (int)$this->ds->count();
 	}
 
 	/**
 	 * Clone dibi datasource instance
-	 * @return void
 	 */
 	public function __clone()
 	{

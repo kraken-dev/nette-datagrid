@@ -2,9 +2,7 @@
 
 namespace DataGrid\DataSources\Doctrine;
 
-use Doctrine,
-	Doctrine\ORM\Query\Expr,
-	DataGrid\DataSources,
+use Doctrine\ORM,
 	DataGrid\DataSources\Utils\WildcardHelper;
 
 /**
@@ -13,14 +11,13 @@ use Doctrine,
  * @author Štěpán Svoboda
  * @author Milan Lempera
  */
-class QueryBuilder extends DataSources\Mapped
+class QueryBuilder
+extends \DataGrid\DataSources\Mapped
 {
 	const MAP_PROPERTIES = 1;
 	const MAP_OBJECTS = 2;
 
-	/**
-	 * @var Doctrine\ORM\QueryBuilder Query builder instance
-	 */
+	/** @var ORM\QueryBuilder Query builder instance */
 	private $qb;
 
 	/**
@@ -29,26 +26,22 @@ class QueryBuilder extends DataSources\Mapped
 	 * Supported are:
 	 *		1. Mapping properties via "SELECT a.id FROM Entities\Article a"
 	 *		2. Mapping objects via "SELECT a FROM Entities\Article a"
-	 * @var integer
+	 * @var int
 	 */
 	private $mappingType;
 
-	/**
-	 * @var array Fetched data
-	 */
+	/** @var array Fetched data */
 	private $data;
 
-	/**
-	 * @var int Total data count
-	 */
+	/** @var int Total data count */
 	private $count;
+
 
 	/**
 	 * Store given query builder instance
-	 * @param QueryBuilder $qb
-	 * @return QueryBuilder
+	 * @param ORM\QueryBuilder $qb
 	 */
-	public function __construct(Doctrine\ORM\QueryBuilder $qb)
+	public function __construct(ORM\QueryBuilder $qb)
 	{
 		$this->qb = $qb;
 	}
@@ -64,12 +57,13 @@ class QueryBuilder extends DataSources\Mapped
 	 * @param string $operation
 	 * @param string $value
 	 * @param string $chainType
-	 * @return QueryBuilder
+	 * @return QueryBuilder (fluent)
+	 * @throws \Nette\InvalidArgumentException
 	 */
 	public function filter($column, $operation = self::EQUAL, $value = NULL, $chainType = NULL)
 	{
 		if (!$this->hasColumn($column)) {
-			throw new \InvalidArgumentException('Trying to filter data source by unknown column.');
+			throw new \Nette\InvalidArgumentException('Trying to filter data source by unknown column.');
 		}
 
 		$nextParamId = count($this->qb->getParameters()) + 1;
@@ -97,7 +91,7 @@ class QueryBuilder extends DataSources\Mapped
 					$this->qb->andWhere($cond);
 				}
 			} elseif ($chainType === self::CHAIN_OR) {
-				$this->qb->andWhere(new Expr\Orx($conds));
+				$this->qb->andWhere(new ORM\Query\Expr\Orx($conds));
 			}
 		} else {
 			$this->validateFilterOperation($operation);
@@ -120,12 +114,13 @@ class QueryBuilder extends DataSources\Mapped
 	 * Sort data source
 	 * @param string $column
 	 * @param string $order
-	 * @return QueryBuilder
+	 * @return QueryBuilder (fluent)
+	 * @throws \Nette\InvalidArgumentException
 	 */
 	public function sort($column, $order = self::ASCENDING)
 	{
 		if (!$this->hasColumn($column)) {
-			throw new \InvalidArgumentException('Trying to sort data source by unknown column.');
+			throw new \Nette\InvalidArgumentException('Trying to sort data source by unknown column.');
 		}
 		
 		$this->qb->addOrderBy($this->mapping[$column], $order === self::ASCENDING ? 'ASC' : 'DESC');
@@ -137,17 +132,22 @@ class QueryBuilder extends DataSources\Mapped
 	 * Reduce data source to given $count starting from $start
 	 * @param integer $count
 	 * @param integer $start
-	 * @return QueryBuilder
+	 * @return QueryBuilder (fluent)
+	 * @throws \Nette\OutOfRangeException
 	 */
 	public function reduce($count, $start = 0)
 	{
 		if ($count == NULL || $count > 0) { //intentionally ==
 			$this->qb->setMaxResults($count == NULL ? NULL : $count);
-		} else throw new \OutOfRangeException;
+		} else {
+			throw new \Nette\OutOfRangeException;
+		}
 
 		if ($start == NULL || ($start > 0 && $start < count($this))) {
 			$this->qb->setFirstResult($start == NULL ? NULL : $start);
-		} else throw new \OutOfRangeException;
+		} else {
+			throw new \Nette\OutOfRangeException;
+		}
 
 		return $this;
 	}
@@ -205,7 +205,6 @@ class QueryBuilder extends DataSources\Mapped
 	/**
 	 * Detect the mapping type.
 	 * It is detected from type of SELECT expressions.
-	 * @return integer
 	 */
 	protected function detectMappingType()
 	{
@@ -218,37 +217,40 @@ class QueryBuilder extends DataSources\Mapped
 		}
 	}
 
-
 	/**
 	 * Count items in data source
-	 * @param string $column name
-	 * @return integer
+	 * @return int
 	 */
 	public function count()
 	{
-		//\Nette\Debug::barDump(debug_backtrace());
 		$query = clone $this->qb->getQuery();
 		$query->setParameters($this->qb->getQuery()->getParameters());
 
-		$query->setHint(Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS, array(__NAMESPACE__ . '\Utils\CountingASTWalker'));
+		$query->setHint(ORM\Query::HINT_CUSTOM_TREE_WALKERS, array(__NAMESPACE__ . '\Utils\CountingASTWalker'));
 		$query->setMaxResults(NULL)->setFirstResult(NULL);
 
 		$parts = $this->qb->getDQLParts();
-		if (array_key_exists('groupBy', $parts) && count($parts['groupBy']) > 0)
+		if (array_key_exists('groupBy', $parts) && count($parts['groupBy']) > 0) {
 			return count($query->getScalarResult());
+		}
 
-		return (int) $query->getSingleScalarResult();
+		return (int)$query->getSingleScalarResult();
 	}
 
+	/**
+	 * @param string $column
+	 * @return array
+	 * @throws \Nette\InvalidArgumentException
+	 */
 	public function getFilterItems($column)
 	{
 		if (!$this->hasColumn($column)) {
-			throw new \InvalidArgumentException('Trying to filter data source by unknown column.');
+			throw new \Nette\InvalidArgumentException('Trying to filter data source by unknown column.');
 			}
 
 		$query=clone $this->qb->getQuery();
 		$query->setParameters($this->qb->getQuery()->getParameters());
-		$query->setHint(Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS, array(__NAMESPACE__.'\Utils\DistinctASTWalker'));
+		$query->setHint(ORM\Query::HINT_CUSTOM_TREE_WALKERS, array(__NAMESPACE__.'\Utils\DistinctASTWalker'));
 		$query->setMaxResults(NULL)->setFirstResult(NULL);
 		$query->setHint('distinct', $this->mapping[$column]);
 		if (!count($res=$query->getArrayResult())) {
@@ -263,4 +265,3 @@ class QueryBuilder extends DataSources\Mapped
 		return array_combine($r, $r);
 	}
 }
-

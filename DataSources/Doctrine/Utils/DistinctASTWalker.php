@@ -40,4 +40,3 @@ extends \Doctrine\ORM\Query\TreeWalkerAdapter
 		$ast->orderByClause=array(); //reset ORDER BY clause, it is not necessary
 	}
 }
-
