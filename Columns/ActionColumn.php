@@ -15,15 +15,16 @@ use Nette,
  * @example    http://addons.nette.org/datagrid
  * @package    Nette\Extras\DataGrid
  */
-class ActionColumn extends Column implements \ArrayAccess
+class ActionColumn
+extends Column
+implements \ArrayAccess
 {
-	/** @var string or DataGrid\Renderes\Column* */
+	/** @var string or DataGrid\Renderes\Column */
 	protected $renderer = "ActionColumn";
 
 	/**
 	 * Action column constructor.
-	 * @param  string  column's textual caption
-	 * @return void
+	 * @param string $caption column's textual caption
 	 */
 	public function __construct($caption = 'Actions')
 	{
@@ -32,7 +33,6 @@ class ActionColumn extends Column implements \ArrayAccess
 		$this->removeComponent($this->getComponent('filters'));
 		$this->orderable = FALSE;
 	}
-
 
 	/**
 	 * Has column filter box?
@@ -43,10 +43,9 @@ class ActionColumn extends Column implements \ArrayAccess
 		return FALSE;
 	}
 
-
 	/**
 	 * Returns column's filter.
-	 * @param  bool   throw exception if component doesn't exist?
+	 * @param bool $need throw exception if component doesn't exist?
 	 * @return DataGrid\Filters\IColumnFilter|NULL
 	 * @throws Nette\InvalidStateException
 	 */
@@ -58,14 +57,13 @@ class ActionColumn extends Column implements \ArrayAccess
 		return NULL;
 	}
 
-
 	/**
 	 * Action factory.
-	 * @param  string  textual title
-	 * @param  string  textual link destination
-	 * @param  Html    element which is added to a generated link
-	 * @param  bool    use ajax? (add class self::$ajaxClass into generated link)
-	 * @param  bool    generate link with argument? (variable $keyName must be defined in data grid)
+	 * @param string $title textual title
+	 * @param string $signal textual link destination
+	 * @param Html $icon element which is added to a generated link
+	 * @param bool $useAjax use ajax? (add class self::$ajaxClass into generated link)
+	 * @param bool $type generate link with argument? (variable $keyName must be defined in data grid)
 	 * @return DataGrid\Action
 	 */
 	public function addAction($title, $signal, $icon = NULL, $useAjax = FALSE, $type = DataGrid\Action::WITH_KEY)
@@ -74,7 +72,6 @@ class ActionColumn extends Column implements \ArrayAccess
 		$this[] = $action;
 		return $action;
 	}
-
 
 	/**
 	 * Does column has any action?
@@ -85,11 +82,10 @@ class ActionColumn extends Column implements \ArrayAccess
 		return count($this->getActions($type)) > 0;
 	}
 
-
 	/**
 	 * Returns column's action specified by name.
-	 * @param  string action's name
-	 * @param  bool   throw exception if component doesn't exist?
+	 * @param string $name action's name
+	 * @param bool $need throw exception if component doesn't exist?
 	 * @return Nette\ComponentModel\IComponent|NULL
 	 * @todo return type
 	 */
@@ -98,10 +94,9 @@ class ActionColumn extends Column implements \ArrayAccess
 		return $this->getComponent('actions')->getComponent($name, $need);
 	}
 
-
 	/**
 	 * Iterates over all column's actions.
-	 * @param  string
+	 * @param string $type
 	 * @return \ArrayIterator|NULL
 	 */
 	public function getActions($type = 'DataGrid\IAction')
@@ -113,11 +108,10 @@ class ActionColumn extends Column implements \ArrayAccess
 		return $actions->getIterator();
 	}
 
-
 	/**
 	 * Formats cell's content.
-	 * @param  mixed
-	 * @param  \DibiRow|array
+	 * @param mixed $value
+	 * @param \DibiRow|array $data
 	 * @return string
 	 * @throws Nette\InvalidStateException
 	 */
@@ -126,28 +120,22 @@ class ActionColumn extends Column implements \ArrayAccess
 		throw new Nette\InvalidStateException("DataGrid\Columns\ActionColumn cannot be formated.");
 	}
 
-
 	/**
 	 * Filters data source.
-	 * @param  mixed
-	 * @throws \InvalidStateException
+	 * @param mixed $value
+	 * @throws Nette\InvalidStateException
 	 */
 	public function applyFilter($value)
 	{
 		throw new Nette\InvalidStateException("DataGrid\Columns\ActionColumn cannot be filtered.");
 	}
 
-
-
 	/********************* interface \ArrayAccess *********************/
-
-
-
 	/**
 	 * Adds the component to the container.
-	 * @param  string  component name
-	 * @param  Nette\ComponentModel\IComponent
-	 * @return void.
+	 * @param string $name component name
+	 * @param Nette\ComponentModel\IComponent $component
+	 * @throws \InvalidArgumentException
 	 */
 	final public function offsetSet($name, $component)
 	{
@@ -157,22 +145,19 @@ class ActionColumn extends Column implements \ArrayAccess
 		$this->getComponent('actions')->addComponent($component, $name == NULL ? count($this->getActions()) : $name);
 	}
 
-
 	/**
 	 * Returns component specified by name. Throws exception if component doesn't exist.
-	 * @param  string  component name
+	 * @param string $name component name
 	 * @return Nette\ComponentModel\IComponent
-	 * @throws \InvalidArgumentException
 	 */
 	final public function offsetGet($name)
 	{
 		return $this->getAction((string) $name, TRUE);
 	}
 
-
 	/**
 	 * Does component specified by name exists?
-	 * @param  string  component name
+	 * @param string $name component name
 	 * @return bool
 	 */
 	final public function offsetExists($name)
@@ -180,11 +165,9 @@ class ActionColumn extends Column implements \ArrayAccess
 		return $this->getAction($name, FALSE) !== NULL;
 	}
 
-
 	/**
 	 * Removes component from the container. Throws exception if component doesn't exist.
-	 * @param  string  component name
-	 * @return void
+	 * @param string $name component name
 	 */
 	final public function offsetUnset($name)
 	{
@@ -193,10 +176,4 @@ class ActionColumn extends Column implements \ArrayAccess
 			$this->getComponent('actions')->removeComponent($component);
 		}
 	}
-
-	public function getRendererId()
-	{
-		return "ActionColumn";
-	}
-
 }

@@ -427,7 +427,7 @@ class Conventional extends Nette\Object implements IRenderer
 
 		// headers
 		foreach ($this->dataGrid->getColumns() as $column) {
-                        $renderer = $this->getColumnRendererById($column->getRendererId());
+                        $renderer = $this->getColumnRenderer($column->getRenderer());
                         $cell = $renderer->generateHeaderCell($column);
 
 			$row->add($cell);
@@ -435,7 +435,7 @@ class Conventional extends Nette\Object implements IRenderer
 
 		return $row;
 	}
-        
+
         public function getSubmitControl() {
                 $form = $this->dataGrid->getForm(TRUE);
 
@@ -457,7 +457,7 @@ class Conventional extends Nette\Object implements IRenderer
 		
 
 		foreach ($this->dataGrid->getColumns() as $column) {
-			$renderer = $this->getColumnRendererById($column->getRendererId());
+			$renderer = $this->getColumnRenderer($column->getRenderer());
                         $cell = $renderer->generateFilterCell($column);
 			$row->add($cell);
 		}
