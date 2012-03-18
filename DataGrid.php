@@ -97,7 +97,7 @@ implements \ArrayAccess
 	public function __construct()
 	{
 		parent::__construct(); // intentionally without any arguments (because of session loadState)
-		$this->paginator = new Nette\Utils\Paginator;
+		$this->paginator = new \Nette\Utils\Paginator;
 
 		$session = $this->getSession();
 		if (!$session->isStarted()) {
