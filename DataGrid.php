@@ -714,9 +714,9 @@ implements \ArrayAccess
 			$this->receivedSignal = 'submit';
 		}
 
-		$form = new Nette\Application\UI\Form($this, $name);
+		$form = new \Nette\Application\UI\Form($this, $name);
 		$form->setTranslator($this->getTranslator());
-		Nette\Forms\Controls\BaseControl::$idMask = 'frm-datagrid-' . $this->getUniqueId() . '-%s-%s';
+		\Nette\Forms\Controls\BaseControl::$idMask = 'frm-datagrid-' . $this->getUniqueId() . '-%s-%s';
 		$form->onSuccess[] = array($this, 'formSubmitHandler');
 
 		$form->addSubmit('resetSubmit', 'Reset state');

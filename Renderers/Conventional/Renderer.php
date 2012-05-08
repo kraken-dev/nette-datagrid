@@ -14,7 +14,7 @@ use Nette\Utils\Html;
  * @package    Nette\Extras\DataGrid
  */
 class Conventional
-extends Nette\Object
+extends \Nette\Object
 implements IRenderer
 {
 	/** @var array  of HTML tags */
@@ -122,14 +122,14 @@ implements IRenderer
 	 * @return string
 	 * @throws Nette\InvalidStateException
 	 */
-	public function render(DataGrid\DataGrid $dataGrid, $mode = NULL)
+	public function render(\DataGrid\DataGrid $dataGrid, $mode = NULL)
 	{
 		if ($this->dataGrid !== $dataGrid) {
 			$this->dataGrid = $dataGrid;
 		}
 
-		if (! $dataGrid->dataSource instanceof DataGrid\DataSources\IDataSource) {
-			throw new Nette\InvalidStateException('Data source is not instance of IDataSource. ' . gettype($this->dataSource) . ' given.');
+		if (! $dataGrid->dataSource instanceof \DataGrid\DataSources\IDataSource) {
+			throw new \Nette\InvalidStateException('Data source is not instance of IDataSource. ' . gettype($this->dataSource) . ' given.');
 		}
 
 		if ($mode !== NULL) {
@@ -215,7 +215,7 @@ implements IRenderer
 		$body = Html::el($container->getName() == 'table' ? 'tbody' : NULL);
 
 		if ($this->dataGrid->paginator->itemCount) {
-			$iterator = new Nette\Iterators\CachingIterator($this->dataGrid->getRows());
+			$iterator = new \Nette\Iterators\CachingIterator($this->dataGrid->getRows());
 			foreach ($iterator as $data) {
 				$row = $this->generateContentRow($data);
 				$row->addClass($iterator->isEven() ? $this->getValue('row.content .even') : NULL);

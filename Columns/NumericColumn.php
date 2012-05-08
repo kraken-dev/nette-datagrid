@@ -15,7 +15,7 @@ class NumericColumn
 extends Column
 {
 	/** @var int */
-	public $recision;
+	public $precision;
 
 
 	/**
