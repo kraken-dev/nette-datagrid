@@ -549,7 +549,7 @@ implements IRenderer
 		}
 
 		if (!is_string($id)) {
-			throw new Nette\InvalidArgumentException("Renderer id must be a string");
+			throw new \Nette\InvalidArgumentException("Renderer id must be a string");
 		}
 
 		// in columnRenderers array may be strings as well as renderer instances
@@ -576,7 +576,7 @@ implements IRenderer
 	 */
 	public function setColumnRenderer($id, $renderer) {
 		if (!is_string($renderer) && !($renderer instanceof \DataGrid\Renderers\Column\IColumnRenderer)) {
-			throw new Nette\InvalidArgumentException("Renderer can only be string renderer classname or renderer object itself.");
+			throw new \Nette\InvalidArgumentException("Renderer can only be string renderer classname or renderer object itself.");
 		}
 		$this->columnRenderers[$id] = $renderer;
 		return $this;

@@ -499,7 +499,7 @@ implements \ArrayAccess
 	 * @param Nette\Application\UI\Form $form
 	 * @throws \Nette\InvalidStateException
 	 */
-	public function formSubmitHandler(Nette\Application\UI\Form $form)
+	public function formSubmitHandler(\Nette\Application\UI\Form $form)
 	{
 		$this->receivedSignal = 'submit';
 
@@ -976,7 +976,7 @@ implements \ArrayAccess
 	 * Sets translate adapter.
 	 * @param Nette\Localization\ITranslator $translator
 	 */
-	public function setTranslator(Nette\Localization\ITranslator $translator = NULL)
+	public function setTranslator(\Nette\Localization\ITranslator $translator = NULL)
 	{
 		$this->translator = $translator;
 	}
