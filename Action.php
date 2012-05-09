@@ -85,7 +85,15 @@ implements IAction
 			case self::WITH_KEY:
 			default:
 				$key = $this->key == NULL || is_bool($this->key) ? $dataGrid->keyName : $this->key;
-				$link = $control->link($this->destination, array($key => $args[$dataGrid->keyName]));
+				$linkArgs = array($key => $args[$dataGrid->keyName]);
+				$destination = $this->destination;
+				if (is_array($destination) && count($destination) > 1) {
+					$target = $destination[0];
+					$linkArgs = array_merge($linkArgs, $destination[1]);
+				} else {
+					$target = $destination;
+				}
+				$link = $control->link($target, $linkArgs);
 				break;
 		}
 
