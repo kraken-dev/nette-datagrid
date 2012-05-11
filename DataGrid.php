@@ -865,6 +865,17 @@ implements \ArrayAccess
 		return $this[$name] = new Columns\TextColumn($caption, $maxLength);
 	}
 
+	/**
+	 * Adds column of html code values.
+	 * @param string $name control name
+	 * @param string $caption column label
+	 * @param int $maxLength maximum number of dislayed characters
+	 * @return Columns\HtmlColumn
+	 */
+	public function addHtmlColumn($name, $caption = NULL, $maxLength = NULL)
+	{
+		return $this[$name] = new Columns\HtmlColumn($caption, $maxLength);
+	}
 
 	/**
 	 * Adds column of numeric values.
